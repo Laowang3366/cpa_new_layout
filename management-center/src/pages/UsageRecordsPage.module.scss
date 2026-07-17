@@ -166,7 +166,7 @@
 
 .filterGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.85fr);
   gap: 12px 14px;
   align-items: stretch;
 
@@ -989,7 +989,7 @@
 
 @media (max-width: 1120px) {
   .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .filterGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .filterGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .modelPricingRow { grid-template-columns: minmax(120px, 1.4fr) 32px repeat(2, minmax(70px, 1fr)) 32px; }
   .modelPricingRow .pricingField:nth-of-type(n + 3) { display: none; }
 }

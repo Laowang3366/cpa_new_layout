@@ -556,15 +556,6 @@ export function UsageRecordsPage() {
     ],
     [stats.providers, t]
   );
-  const modelOptions = useMemo(() => {
-    const models = [...new Set(stats.models.map((item) => item.key.trim()).filter(Boolean))]
-      .sort((left, right) => left.localeCompare(right));
-    return [
-      { value: '', label: t('usage_records.all_models', { defaultValue: '全部模型' }) },
-      ...models.map((model) => ({ value: model, label: model })),
-    ];
-  }, [stats.models, t]);
-
   const statusOptions = [
     { value: 'all', label: t('usage_records.status_all', { defaultValue: '全部状态' }) },
     { value: 'success', label: t('usage_records.status_success', { defaultValue: '成功' }) },
@@ -727,12 +718,6 @@ export function UsageRecordsPage() {
               { value: '30d', label: t('usage_records.range_30d', { defaultValue: '近一个月' }) },
             ]}
             onChange={(value) => { setTimeRange(value as UsageTimeRange); setPage(1); }}
-          />
-          <ClickFilter
-            label={t('usage_records.model_filter', { defaultValue: '模型筛选' })}
-            value={draftFilters.model ?? ''}
-            options={modelOptions}
-            onChange={(value) => updateDraft({ model: value })}
           />
           <ClickFilter
             label={t('usage_records.status_filter', { defaultValue: '状态筛选' })}
