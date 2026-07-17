@@ -297,6 +297,38 @@ function SortableHeader({
   );
 }
 
+function ClickFilter({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: Array<{ value: string; label: string }>;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className={styles.clickFilter}>
+      <span className={styles.clickFilterLabel}>{label}</span>
+      <div className={styles.clickFilterOptions} role="group" aria-label={label}>
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            className={value === option.value ? styles.clickFilterOptionActive : ''}
+            onClick={() => onChange(option.value)}
+            aria-pressed={value === option.value}
+            title={option.label}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function BreakdownCard({
   title,
   items,
@@ -685,45 +717,35 @@ export function UsageRecordsPage() {
 
       <Card className={styles.filterCard}>
         <div className={styles.filterGrid}>
-          <div className={`${styles.filterField} ${styles.timeRangeField}`}>
-            <label>{t('usage_records.time_range', { defaultValue: '时间范围' })}</label>
-            <div className={styles.timeRangeControl}>
-              {([
-                ['24h', t('usage_records.range_24h', { defaultValue: '近24小时' })],
-                ['3d', t('usage_records.range_3d', { defaultValue: '近3天' })],
-                ['7d', t('usage_records.range_7d', { defaultValue: '近7天' })],
-                ['30d', t('usage_records.range_30d', { defaultValue: '近一个月' })],
-              ] as const).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={timeRange === value ? styles.timeRangeOptionActive : ''}
-                  onClick={() => { setTimeRange(value); setPage(1); }}
-                  aria-pressed={timeRange === value}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <Input
-            label={t('usage_records.search', { defaultValue: '搜索' })}
-            placeholder={t('usage_records.search_placeholder', { defaultValue: '模型、账号、端点或请求 ID' })}
-            value={draftFilters.search ?? ''}
-            onChange={(event) => updateDraft({ search: event.target.value })}
+          <ClickFilter
+            label={t('usage_records.time_filter', { defaultValue: '时间筛选' })}
+            value={timeRange}
+            options={[
+              { value: '24h', label: t('usage_records.range_24h', { defaultValue: '近24小时' }) },
+              { value: '3d', label: t('usage_records.range_3d', { defaultValue: '近3天' }) },
+              { value: '7d', label: t('usage_records.range_7d', { defaultValue: '近7天' }) },
+              { value: '30d', label: t('usage_records.range_30d', { defaultValue: '近一个月' }) },
+            ]}
+            onChange={(value) => { setTimeRange(value as UsageTimeRange); setPage(1); }}
           />
-          <div className={styles.filterField}>
-            <label>{t('usage_records.model', { defaultValue: '模型' })}</label>
-            <Select value={draftFilters.model ?? ''} options={modelOptions} onChange={(value) => updateDraft({ model: value })} ariaLabel={t('usage_records.model', { defaultValue: '模型' })} />
-          </div>
-          <div className={styles.filterField}>
-            <label>{t('usage_records.provider', { defaultValue: 'Provider' })}</label>
-            <Select value={draftFilters.provider ?? ''} options={providerOptions} onChange={(value) => updateDraft({ provider: value })} ariaLabel="Provider" />
-          </div>
-          <div className={styles.filterField}>
-            <label>{t('usage_records.status', { defaultValue: '状态' })}</label>
-            <Select value={draftFilters.status ?? 'all'} options={statusOptions} onChange={(value) => updateDraft({ status: value as UsageStatusFilter })} ariaLabel="Status" />
-          </div>
+          <ClickFilter
+            label={t('usage_records.model_filter', { defaultValue: '模型筛选' })}
+            value={draftFilters.model ?? ''}
+            options={modelOptions}
+            onChange={(value) => updateDraft({ model: value })}
+          />
+          <ClickFilter
+            label={t('usage_records.status_filter', { defaultValue: '状态筛选' })}
+            value={draftFilters.status ?? 'all'}
+            options={statusOptions}
+            onChange={(value) => updateDraft({ status: value as UsageStatusFilter })}
+          />
+          <ClickFilter
+            label="Provider"
+            value={draftFilters.provider ?? ''}
+            options={providerOptions}
+            onChange={(value) => updateDraft({ provider: value })}
+          />
         </div>
       </Card>
 
@@ -732,7 +754,20 @@ export function UsageRecordsPage() {
         <BreakdownCard title={t('usage_records.accounts', { defaultValue: '账号分布' })} items={stats.accounts} tokenCurrency={pricing.currency} firstColumnLabel={t('usage_records.account', { defaultValue: '账号' })} />
       </div>
 
-      <Card title={t('usage_records.details', { defaultValue: '使用明细' })} className={styles.detailsCard}>
+      <Card
+        title={t('usage_records.details', { defaultValue: '使用明细' })}
+        extra={(
+          <div className={styles.detailsSearch}>
+            <Input
+              aria-label={t('usage_records.search', { defaultValue: '搜索' })}
+              placeholder={t('usage_records.search_placeholder', { defaultValue: '模型、账号、端点或请求 ID' })}
+              value={draftFilters.search ?? ''}
+              onChange={(event) => updateDraft({ search: event.target.value })}
+            />
+          </div>
+        )}
+        className={styles.detailsCard}
+      >
         {loading ? (
           <div className={styles.loading}>{t('common.loading')}</div>
         ) : items.length === 0 ? (

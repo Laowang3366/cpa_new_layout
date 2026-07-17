@@ -166,9 +166,9 @@
 
 .filterGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 14px;
-  align-items: end;
+  align-items: stretch;
 
   :global(.form-group) {
     min-width: 0;
@@ -190,27 +190,41 @@
   }
 }
 
-.filterField {
+.filterField,
+.clickFilter {
   min-width: 0;
 }
 
-.timeRangeField {
-  grid-column: 1 / -1;
+.clickFilter {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
 }
 
-.timeRangeControl {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  height: 40px;
-  overflow: hidden;
+.clickFilterLabel {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.clickFilterOptions {
+  display: flex;
+  min-width: 0;
+  height: 42px;
+  overflow-x: auto;
+  overflow-y: hidden;
   border: 1px solid var(--border-color);
   border-radius: $radius-md;
   background: var(--bg-primary);
+  scrollbar-width: thin;
 }
 
-.timeRangeControl button {
-  min-width: 0;
-  padding: 0 10px;
+.clickFilterOptions button {
+  min-width: 82px;
+  flex: 1 0 auto;
+  padding: 0 12px;
   border: 0;
   border-right: 1px solid var(--border-color);
   background: transparent;
@@ -223,16 +237,16 @@
   transition: color $transition-fast, background-color $transition-fast;
 }
 
-.timeRangeControl button:last-child {
+.clickFilterOptions button:last-child {
   border-right: 0;
 }
 
-.timeRangeControl button:hover {
+.clickFilterOptions button:hover {
   color: var(--text-primary);
   background: var(--bg-hover);
 }
 
-.timeRangeControl .timeRangeOptionActive {
+.clickFilterOptions .clickFilterOptionActive {
   background: var(--primary-color);
   color: var(--primary-contrast, #fff);
 }
@@ -396,6 +410,19 @@
 .detailsCard {
   order: 3;
   min-width: 0;
+}
+
+.detailsSearch {
+  width: min(380px, 48vw);
+
+  :global(.form-group) {
+    margin-bottom: 0;
+  }
+
+  :global(.input) {
+    height: 38px;
+    font-size: 12px;
+  }
 }
 
 .tableWrap {
@@ -962,7 +989,7 @@
 
 @media (max-width: 1120px) {
   .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .filterGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .filterGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .modelPricingRow { grid-template-columns: minmax(120px, 1.4fr) 32px repeat(2, minmax(70px, 1fr)) 32px; }
   .modelPricingRow .pricingField:nth-of-type(n + 3) { display: none; }
 }
@@ -981,6 +1008,8 @@
   .statsGrid,
   .filterGrid,
   .overviewGrid { grid-template-columns: 1fr; }
+  .detailsSearch { width: 100%; }
+  .clickFilter { grid-template-columns: 72px minmax(0, 1fr); }
   .statCard { min-height: 94px; }
   .paginationBar { align-items: stretch; flex-direction: column; gap: 10px; }
   .paginationControls { width: 100%; justify-content: space-between; }
