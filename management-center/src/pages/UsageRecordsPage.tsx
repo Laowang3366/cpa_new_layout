@@ -37,19 +37,13 @@ import styles from './UsageRecordsPage.module.scss';
 
 const PAGE_SIZES = [10, 30, 50] as const;
 type UsageSortField = Exclude<UsageRecordFilters['sort_by'], undefined>;
+type UsageTimeRange = '24h' | '3d' | '7d' | '30d';
 
-const toDateInputValue = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const defaultRange = () => {
+const buildTimeRange = (range: UsageTimeRange) => {
   const end = new Date();
-  const start = new Date(end);
-  start.setDate(start.getDate() - 6);
-  return { start: toDateInputValue(start), end: toDateInputValue(end) };
+  const hours = range === '24h' ? 24 : range === '3d' ? 72 : range === '7d' ? 168 : 720;
+  const start = new Date(end.getTime() - hours * 60 * 60 * 1000);
+  return { start: start.toISOString(), end: end.toISOString() };
 };
 
 const emptyStats: UsageStats = {
@@ -447,10 +441,8 @@ function PricingField({
 export function UsageRecordsPage() {
   const { t } = useTranslation();
   const connectionStatus = useAuthStore((state) => state.connectionStatus);
-  const range = useMemo(() => defaultRange(), []);
+  const [timeRange, setTimeRange] = useState<UsageTimeRange>('24h');
   const [draftFilters, setDraftFilters] = useState<UsageRecordFilters>({
-    start: range.start,
-    end: range.end,
     status: 'all',
   });
   const [filters, setFilters] = useState<UsageRecordFilters>(draftFilters);
@@ -490,7 +482,7 @@ export function UsageRecordsPage() {
     setError('');
     try {
       const [listResponse, statsResponse] = await Promise.all([
-        usageRecordsApi.list(appliedListFilters),
+        usageRecordsApi.list({ ...appliedListFilters, ...buildTimeRange(timeRange) }),
         usageRecordsApi.stats({}),
       ]);
       setItems(listResponse.items ?? []);
@@ -504,7 +496,7 @@ export function UsageRecordsPage() {
     } finally {
       setLoading(false);
     }
-  }, [appliedListFilters, connectionStatus]);
+  }, [appliedListFilters, connectionStatus, timeRange]);
 
   useEffect(() => {
     void loadData();
@@ -557,21 +549,6 @@ export function UsageRecordsPage() {
     }, 250);
     return () => window.clearTimeout(timer);
   }, [draftFilters]);
-
-  const resetFilters = () => {
-    const next = {
-      start: range.start,
-      end: range.end,
-      model: '',
-      endpoint: '',
-      status: 'all' as UsageStatusFilter,
-      sort_by: 'timestamp' as const,
-      sort_order: 'desc' as const,
-    };
-    setDraftFilters(next);
-    setFilters(next);
-    setPage(1);
-  };
 
   const handleSort = (field: UsageSortField) => {
     const activeField = draftFilters.sort_by ?? 'timestamp';
@@ -708,18 +685,27 @@ export function UsageRecordsPage() {
 
       <Card className={styles.filterCard}>
         <div className={styles.filterGrid}>
-          <Input
-            label={t('usage_records.date_start', { defaultValue: '开始日期' })}
-            type="date"
-            value={draftFilters.start ?? ''}
-            onChange={(event) => updateDraft({ start: event.target.value })}
-          />
-          <Input
-            label={t('usage_records.date_end', { defaultValue: '结束日期' })}
-            type="date"
-            value={draftFilters.end ?? ''}
-            onChange={(event) => updateDraft({ end: event.target.value })}
-          />
+          <div className={`${styles.filterField} ${styles.timeRangeField}`}>
+            <label>{t('usage_records.time_range', { defaultValue: '时间范围' })}</label>
+            <div className={styles.timeRangeControl}>
+              {([
+                ['24h', t('usage_records.range_24h', { defaultValue: '近24小时' })],
+                ['3d', t('usage_records.range_3d', { defaultValue: '近3天' })],
+                ['7d', t('usage_records.range_7d', { defaultValue: '近7天' })],
+                ['30d', t('usage_records.range_30d', { defaultValue: '近一个月' })],
+              ] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={timeRange === value ? styles.timeRangeOptionActive : ''}
+                  onClick={() => { setTimeRange(value); setPage(1); }}
+                  aria-pressed={timeRange === value}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <Input
             label={t('usage_records.search', { defaultValue: '搜索' })}
             placeholder={t('usage_records.search_placeholder', { defaultValue: '模型、账号、端点或请求 ID' })}
@@ -737,9 +723,6 @@ export function UsageRecordsPage() {
           <div className={styles.filterField}>
             <label>{t('usage_records.status', { defaultValue: '状态' })}</label>
             <Select value={draftFilters.status ?? 'all'} options={statusOptions} onChange={(value) => updateDraft({ status: value as UsageStatusFilter })} ariaLabel="Status" />
-          </div>
-          <div className={styles.filterActions}>
-            <Button variant="secondary" size="sm" onClick={resetFilters}>{t('common.reset', { defaultValue: '重置' })}</Button>
           </div>
         </div>
       </Card>

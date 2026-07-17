@@ -194,6 +194,49 @@
   min-width: 0;
 }
 
+.timeRangeField {
+  grid-column: 1 / -1;
+}
+
+.timeRangeControl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  height: 40px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: $radius-md;
+  background: var(--bg-primary);
+}
+
+.timeRangeControl button {
+  min-width: 0;
+  padding: 0 10px;
+  border: 0;
+  border-right: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color $transition-fast, background-color $transition-fast;
+}
+
+.timeRangeControl button:last-child {
+  border-right: 0;
+}
+
+.timeRangeControl button:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.timeRangeControl .timeRangeOptionActive {
+  background: var(--primary-color);
+  color: var(--primary-contrast, #fff);
+}
+
 .filterActions {
   display: flex;
   align-items: center;
