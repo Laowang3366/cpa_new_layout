@@ -750,7 +750,7 @@
 }
 
 .quotaTableWrap {
-  width: min(100%, 990px);
+  width: 100%;
   overflow-x: auto;
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -758,7 +758,7 @@
 }
 
 .quotaTable {
-  width: 990px;
+  width: 100%;
   min-width: 990px;
   border-collapse: collapse;
   table-layout: fixed;
