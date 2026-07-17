@@ -534,10 +534,13 @@ export function UsageRecordsPage() {
     setDraftFilters((current) => ({ ...current, ...patch }));
   };
 
-  const applyFilters = () => {
-    setPage(1);
-    setFilters({ ...draftFilters });
-  };
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setPage(1);
+      setFilters({ ...draftFilters });
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [draftFilters]);
 
   const resetFilters = () => {
     const next = {
@@ -717,7 +720,6 @@ export function UsageRecordsPage() {
             <Select value={draftFilters.sort_order ?? 'desc'} options={sortOrderOptions} onChange={(value) => updateDraft({ sort_order: value as UsageRecordFilters['sort_order'] })} ariaLabel="Sort order" />
           </div>
           <div className={styles.filterActions}>
-            <Button size="sm" onClick={applyFilters}>{t('common.apply', { defaultValue: '查询' })}</Button>
             <Button variant="secondary" size="sm" onClick={resetFilters}>{t('common.reset', { defaultValue: '重置' })}</Button>
           </div>
         </div>
