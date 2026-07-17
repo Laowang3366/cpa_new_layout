@@ -443,12 +443,14 @@
 .displayModeControl {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 10px;
   min-width: 0;
   width: 100%;
 
   > span {
+    width: 72px;
+    flex: 0 0 72px;
     color: var(--text-tertiary);
     font-size: 11px;
     font-weight: 700;
@@ -460,7 +462,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  width: min(72%, 410px);
+  width: auto;
   height: 42px;
   padding: 3px;
   border: 1px solid var(--border-color);
@@ -469,9 +471,9 @@
   box-sizing: border-box;
 
   button {
-    min-width: 0;
+    min-width: 72px;
     height: 34px;
-    flex: 1 1 0;
+    flex: 0 0 auto;
     padding: 0 10px;
     border: 0;
     border-radius: 5px;
@@ -507,12 +509,14 @@
 .sortModeControl {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 10px;
   min-width: 0;
   width: 100%;
 
   > span {
+    width: 72px;
+    flex: 0 0 72px;
     color: var(--text-tertiary);
     font-size: 11px;
     font-weight: 700;
@@ -525,7 +529,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  width: min(72%, 410px);
+  width: auto;
   height: 42px;
   padding: 3px;
   border: 1px solid var(--border-color);
@@ -535,8 +539,8 @@
 
   button {
     height: 34px;
-    min-width: 0;
-    flex: 1 1 0;
+    min-width: 76px;
+    flex: 0 0 auto;
     padding: 0 10px;
     border: 0;
     border-radius: 5px;
