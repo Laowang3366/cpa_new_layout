@@ -8,6 +8,7 @@ import (
 	"time"
 
 	internallogging "github.com/router-for-me/CLIProxyAPI/v7/internal/logging"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/usagehistory"
 	coreusage "github.com/router-for-me/CLIProxyAPI/v7/sdk/cliproxy/usage"
 )
 
@@ -21,10 +22,6 @@ func (p *usageQueuePlugin) HandleUsage(ctx context.Context, record coreusage.Rec
 	if p == nil {
 		return
 	}
-	if !Enabled() || !UsageStatisticsEnabled() {
-		return
-	}
-
 	timestamp := record.RequestedAt
 	if timestamp.IsZero() {
 		timestamp = time.Now()
@@ -87,6 +84,25 @@ func (p *usageQueuePlugin) HandleUsage(ctx context.Context, record coreusage.Rec
 		failed = !resolveSuccess(ctx)
 	}
 	fail := resolveFail(ctx, record, failed)
+	historyFail := fail
+	if len(historyFail.Body) > 512 {
+		historyFail.Body = historyFail.Body[:512]
+	}
+	_ = usagehistory.Append(usagehistory.Record{
+		Timestamp: timestamp, FirstTokenMs: record.TTFT.Milliseconds(), LatencyMs: record.Latency.Milliseconds(),
+		Source: record.Source, ReasoningEffort: reasoningEffort, AuthIndex: record.AuthIndex,
+		Tokens: usagehistory.TokenStats{
+			InputTokens: tokens.InputTokens, OutputTokens: tokens.OutputTokens,
+			ReasoningTokens: tokens.ReasoningTokens, CachedTokens: tokens.CachedTokens,
+			TotalTokens: tokens.TotalTokens,
+		},
+		Failed: failed, Fail: usagehistory.Failure{StatusCode: historyFail.StatusCode, Body: historyFail.Body},
+		Provider: provider, Model: modelName, Alias: aliasName, Endpoint: resolveEndpoint(ctx),
+		AuthType: authType, RequestID: requestID,
+	})
+	if !Enabled() || !UsageStatisticsEnabled() {
+		return
+	}
 
 	detail := requestDetail{
 		Timestamp:       timestamp,

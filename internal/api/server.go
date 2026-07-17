@@ -37,6 +37,7 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/registry"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/runtime/executor/helps"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/safemode"
+	"github.com/router-for-me/CLIProxyAPI/v7/internal/usagehistory"
 	"github.com/router-for-me/CLIProxyAPI/v7/internal/util"
 	sdkaccess "github.com/router-for-me/CLIProxyAPI/v7/sdk/access"
 	"github.com/router-for-me/CLIProxyAPI/v7/sdk/api/handlers"
@@ -352,6 +353,18 @@ func NewServer(cfg *config.Config, authManager *auth.Manager, accessManager *sdk
 		authManager.SetRetryConfig(cfg.RequestRetry, time.Duration(cfg.MaxRetryInterval)*time.Second, cfg.MaxRetryCredentials)
 	}
 	managementasset.SetCurrentConfig(cfg)
+	historyDir := strings.TrimSpace(os.Getenv("CLI_PROXY_USAGE_DIR"))
+	if historyDir == "" && configFilePath != "" {
+		historyDir = filepath.Dir(configFilePath)
+	}
+	if historyDir != "" {
+		if err := usagehistory.Configure(
+			filepath.Join(historyDir, "usage-history.jsonl"),
+			filepath.Join(historyDir, "usage-pricing.json"),
+		); err != nil {
+			log.WithError(err).Error("failed to configure persistent usage history")
+		}
+	}
 	auth.SetQuotaCooldownDisabled(cfg.DisableCooling)
 	auth.SetTransientErrorCooldownSeconds(cfg.TransientErrorCooldownSeconds)
 	applySignatureCacheConfig(nil, cfg)
@@ -865,6 +878,10 @@ func (s *Server) registerManagementRoutes() {
 		mgmt.DELETE("/api-keys", s.mgmt.DeleteAPIKeys)
 		mgmt.GET("/api-key-usage", s.mgmt.GetAPIKeyUsage)
 		mgmt.GET("/usage-queue", s.mgmt.GetUsageQueue)
+		mgmt.GET("/usage-records", s.mgmt.GetUsageRecords)
+		mgmt.GET("/usage-records/stats", s.mgmt.GetUsageRecordStats)
+		mgmt.GET("/usage-records/pricing", s.mgmt.GetUsagePricing)
+		mgmt.PUT("/usage-records/pricing", s.mgmt.PutUsagePricing)
 
 		mgmt.GET("/gemini-api-key", s.mgmt.GetGeminiKeys)
 		mgmt.PUT("/gemini-api-key", s.mgmt.PutGeminiKeys)
