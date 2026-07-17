@@ -1632,6 +1632,7 @@
     "providers": "Provider 分布",
     "endpoints": "端點分布",
     "accounts": "帳戶分布",
+    "model_cache_hits": "模型快取命中",
     "trend": "Token 使用趨勢",
     "details": "使用明細",
     "time": "時間",

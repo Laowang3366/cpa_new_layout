@@ -1620,6 +1620,7 @@
     "providers": "Provider distribution",
     "endpoints": "Endpoint distribution",
     "accounts": "Account distribution",
+    "model_cache_hits": "Model cache hits",
     "trend": "Token usage trend",
     "details": "Usage details",
     "time": "Time",

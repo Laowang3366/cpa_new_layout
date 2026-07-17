@@ -1620,6 +1620,7 @@
     "providers": "Provider 分布",
     "endpoints": "端点分布",
     "accounts": "账号分布",
+    "model_cache_hits": "模型缓存命中",
     "trend": "Token 使用趋势",
     "details": "使用明细",
     "time": "时间",

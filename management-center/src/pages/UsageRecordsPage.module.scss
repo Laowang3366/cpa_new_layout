@@ -209,6 +209,7 @@
 
 .breakdownCard {
   min-width: 0;
+  min-height: 330px;
 }
 
 .breakdownList {
@@ -264,14 +265,28 @@
   background: var(--bg-secondary);
 }
 
-.breakdownBar,
-.trendBar {
+.breakdownBar {
   display: block;
   height: 100%;
   min-width: 2px;
   border-radius: inherit;
   background: linear-gradient(90deg, var(--primary-color), color-mix(in srgb, var(--primary-color) 48%, #10b981));
   transition: width $transition-normal;
+}
+
+.cacheRateBar {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0ea5e9, #10b981);
+  transition: width $transition-normal;
+}
+
+.cacheRateValue {
+  color: #138a55;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .noData,
@@ -284,40 +299,51 @@
 
 .trendCard {
   min-width: 0;
+  min-height: 330px;
 }
 
-.trendList {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.lineChartWrap {
+  width: 100%;
+  min-height: 250px;
+  overflow-x: auto;
 }
 
-.trendRow {
-  display: grid;
-  grid-template-columns: 118px minmax(80px, 1fr) 54px 74px;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
+.lineChart {
+  display: block;
+  width: 100%;
+  min-width: 520px;
+  height: 250px;
 }
 
-.trendLabel,
-.trendValue,
-.trendRequests {
-  color: var(--text-secondary);
+.chartGridLine {
+  stroke: var(--border-color);
+  stroke-width: 1;
+}
+
+.chartAxisText {
+  fill: var(--text-tertiary);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
-.trendValue {
-  color: var(--text-primary);
-  font-weight: 600;
-  text-align: right;
+.chartAreaLine {
+  fill: none;
+  stroke: var(--primary-color);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
 }
 
-.trendRequests {
-  color: var(--text-tertiary);
-  text-align: right;
+.chartPoint circle {
+  fill: var(--bg-primary);
+  stroke: var(--primary-color);
+  stroke-width: 3;
+  transition: fill $transition-fast, r $transition-fast;
+}
+
+.chartPoint:hover circle {
+  fill: var(--primary-color);
+  r: 6px;
 }
 
 .detailsCard {
@@ -865,8 +891,6 @@
   .headerActions { justify-content: flex-start; }
   .filterGrid,
   .overviewGrid { grid-template-columns: 1fr 1fr; }
-  .trendRow { grid-template-columns: 100px minmax(70px, 1fr) 50px; }
-  .trendRequests { display: none; }
   .pricingGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .modelPricingHeader { flex-direction: column; }
   .modelPricingAdd { width: 100%; min-width: 0; }

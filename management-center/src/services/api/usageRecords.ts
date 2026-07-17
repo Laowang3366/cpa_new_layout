@@ -42,6 +42,8 @@ export interface UsageBreakdown {
   requests: number;
   failures: number;
   tokens: number;
+  input_tokens: number;
+  cached_tokens: number;
   cost: number;
   cost_known: boolean;
 }

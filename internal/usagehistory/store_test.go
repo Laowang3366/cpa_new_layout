@@ -41,7 +41,7 @@ func TestStorePersistsFiltersAndRecalculatesCost(t *testing.T) {
 			Provider:     "openai",
 			Model:        "gpt-5",
 			Endpoint:     "POST /v1/responses",
-			Tokens:       TokenStats{InputTokens: 1000, OutputTokens: 500, TotalTokens: 1500},
+			Tokens:       TokenStats{InputTokens: 1000, OutputTokens: 500, CachedTokens: 800, TotalTokens: 1500},
 		},
 		{
 			Timestamp: base.Add(time.Hour),
@@ -64,8 +64,8 @@ func TestStorePersistsFiltersAndRecalculatesCost(t *testing.T) {
 	if result.Total != 1 || len(result.Items) != 1 {
 		t.Fatalf("success result = %+v, want one item", result)
 	}
-	if !result.Items[0].CostKnown || result.Items[0].Cost != 0.002 {
-		t.Fatalf("cost = %v known=%v, want 0.002 known", result.Items[0].Cost, result.Items[0].CostKnown)
+	if !result.Items[0].CostKnown || result.Items[0].Cost != 0.0016 {
+		t.Fatalf("cost = %v known=%v, want 0.0016 known", result.Items[0].Cost, result.Items[0].CostKnown)
 	}
 
 	stats := store.Stats(Filter{Granularity: "hour"})
@@ -74,6 +74,9 @@ func TestStorePersistsFiltersAndRecalculatesCost(t *testing.T) {
 	}
 	if stats.AverageLatencyMs != 200 || len(stats.Trend) != 2 || len(stats.Models) != 2 {
 		t.Fatalf("stats aggregation = %+v", stats)
+	}
+	if stats.Models[1].Key != "gpt-5" || stats.Models[1].InputTokens != 1000 || stats.Models[1].CachedTokens != 800 {
+		t.Fatalf("model token breakdown = %+v", stats.Models)
 	}
 
 	reloaded := NewStore()

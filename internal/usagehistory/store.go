@@ -94,12 +94,14 @@ type ListResult struct {
 }
 
 type Breakdown struct {
-	Key       string  `json:"key"`
-	Requests  int64   `json:"requests"`
-	Failures  int64   `json:"failures"`
-	Tokens    int64   `json:"tokens"`
-	Cost      float64 `json:"cost"`
-	CostKnown bool    `json:"cost_known"`
+	Key          string  `json:"key"`
+	Requests     int64   `json:"requests"`
+	Failures     int64   `json:"failures"`
+	Tokens       int64   `json:"tokens"`
+	InputTokens  int64   `json:"input_tokens"`
+	CachedTokens int64   `json:"cached_tokens"`
+	Cost         float64 `json:"cost"`
+	CostKnown    bool    `json:"cost_known"`
 }
 
 type TrendPoint struct {
@@ -781,6 +783,8 @@ func addBreakdown(target map[string]*Breakdown, key string, record Record) {
 		item.Failures++
 	}
 	item.Tokens += record.Tokens.TotalTokens
+	item.InputTokens += record.Tokens.InputTokens
+	item.CachedTokens += record.Tokens.CachedTokens
 	item.Cost += record.Cost
 	item.CostKnown = item.CostKnown && record.CostKnown
 }

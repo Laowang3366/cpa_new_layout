@@ -29,6 +29,7 @@ import {
   type UsageRecordFilters,
   type UsageStats,
   type UsageStatusFilter,
+  type UsageTrendPoint,
 } from '@/services/api/usageRecords';
 import { formatDateTimeValue } from '@/utils/format';
 import { getErrorMessage } from '@/utils/helpers';
@@ -316,6 +317,93 @@ function BreakdownCard({
   );
 }
 
+function ModelCacheCard({ title, items }: { title: string; items: UsageBreakdown[] }) {
+  const ranked = [...items]
+    .filter((item) => item.input_tokens > 0)
+    .sort((a, b) => (b.cached_tokens / b.input_tokens) - (a.cached_tokens / a.input_tokens))
+    .slice(0, 8);
+
+  return (
+    <Card title={title} className={styles.breakdownCard}>
+      {ranked.length === 0 ? (
+        <div className={styles.noData}>--</div>
+      ) : (
+        <div className={styles.breakdownList}>
+          {ranked.map((item) => {
+            const hitRate = Math.min(100, (item.cached_tokens / item.input_tokens) * 100);
+            return (
+              <div className={styles.breakdownRow} key={item.key}>
+                <div className={styles.breakdownHeading}>
+                  <span className={styles.breakdownKey} title={item.key}>{item.key || 'unknown'}</span>
+                  <strong className={styles.cacheRateValue}>{hitRate.toFixed(1)}%</strong>
+                </div>
+                <div className={styles.breakdownBarTrack}>
+                  <span className={styles.cacheRateBar} style={{ width: `${Math.max(2, hitRate)}%` }} />
+                </div>
+                <div className={styles.breakdownValues}>
+                  <span>{formatTokens(item.cached_tokens)} cached</span>
+                  <span>{formatTokens(item.input_tokens)} input</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function TrendChart({ title, points }: { title: string; points: UsageTrendPoint[] }) {
+  const width = 720;
+  const height = 250;
+  const padding = { top: 22, right: 20, bottom: 44, left: 54 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const maxTokens = Math.max(1, ...points.map((point) => point.tokens));
+  const coordinates = points.map((point, index) => ({
+    point,
+    x: padding.left + (points.length === 1 ? chartWidth / 2 : (index / (points.length - 1)) * chartWidth),
+    y: padding.top + chartHeight - (point.tokens / maxTokens) * chartHeight,
+  }));
+  const line = coordinates.map(({ x, y }) => `${x},${y}`).join(' ');
+
+  return (
+    <Card title={title} className={styles.trendCard}>
+      {points.length === 0 ? (
+        <div className={styles.noData}>--</div>
+      ) : (
+        <div className={styles.lineChartWrap}>
+          <svg className={styles.lineChart} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={title}>
+            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+              const y = padding.top + chartHeight * ratio;
+              return (
+                <g key={ratio}>
+                  <line className={styles.chartGridLine} x1={padding.left} y1={y} x2={width - padding.right} y2={y} />
+                  <text className={styles.chartAxisText} x={padding.left - 9} y={y + 4} textAnchor="end">
+                    {formatTokens(maxTokens * (1 - ratio))}
+                  </text>
+                </g>
+              );
+            })}
+            <polyline className={styles.chartAreaLine} points={line} />
+            {coordinates.map(({ point, x, y }, index) => (
+              <g className={styles.chartPoint} key={point.timestamp}>
+                <circle cx={x} cy={y} r="4" />
+                <title>{`${formatDateTimeValue(point.timestamp)} · ${formatTokens(point.tokens)} Token · ${formatInteger(point.requests)} requests`}</title>
+                {(index === 0 || index === coordinates.length - 1 || index % Math.max(1, Math.ceil(coordinates.length / 5)) === 0) && (
+                  <text className={styles.chartAxisText} x={x} y={height - 15} textAnchor="middle">
+                    {new Date(point.timestamp).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}
+                  </text>
+                )}
+              </g>
+            ))}
+          </svg>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 function PricingField({
   label,
   value,
@@ -429,8 +517,6 @@ export function UsageRecordsPage() {
   const successRate = stats.total_requests > 0
     ? `${((stats.success_requests / stats.total_requests) * 100).toFixed(1)}%`
     : '--';
-  const maxTrendTokens = Math.max(1, ...stats.trend.map((point) => point.tokens));
-
   const providerOptions = useMemo(
     () => [
       { value: '', label: t('usage_records.all_providers', { defaultValue: '全部 Provider' }) },
@@ -662,29 +748,10 @@ export function UsageRecordsPage() {
 
       <div className={styles.overviewGrid}>
         <BreakdownCard title={t('usage_records.models', { defaultValue: '模型分布' })} items={stats.models} tokenCurrency={pricing.currency} />
-        <BreakdownCard title={t('usage_records.providers', { defaultValue: 'Provider 分布' })} items={stats.providers} tokenCurrency={pricing.currency} />
-        <BreakdownCard title={t('usage_records.endpoints', { defaultValue: '端点分布' })} items={stats.endpoints} tokenCurrency={pricing.currency} />
         <BreakdownCard title={t('usage_records.accounts', { defaultValue: '账号分布' })} items={stats.accounts} tokenCurrency={pricing.currency} />
+        <ModelCacheCard title={t('usage_records.model_cache_hits', { defaultValue: '模型缓存命中' })} items={stats.models} />
+        <TrendChart title={t('usage_records.trend', { defaultValue: 'Token 使用趋势' })} points={stats.trend} />
       </div>
-
-      <Card title={t('usage_records.trend', { defaultValue: 'Token 使用趋势' })} className={styles.trendCard}>
-        {stats.trend.length === 0 ? (
-          <div className={styles.noData}>--</div>
-        ) : (
-          <div className={styles.trendList}>
-            {stats.trend.map((point) => (
-              <div className={styles.trendRow} key={point.timestamp}>
-                <span className={styles.trendLabel}>{formatDateTimeValue(point.timestamp)}</span>
-                <div className={styles.trendTrack}>
-                  <span className={styles.trendBar} style={{ width: `${Math.max(2, (point.tokens / maxTrendTokens) * 100)}%` }} />
-                </div>
-                <span className={styles.trendValue}>{formatTokens(point.tokens)}</span>
-                <span className={styles.trendRequests}>{formatInteger(point.requests)} req</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </Card>
 
       <Card title={t('usage_records.details', { defaultValue: '使用明细' })} className={styles.detailsCard}>
         {loading ? (
