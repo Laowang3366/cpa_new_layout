@@ -160,6 +160,7 @@
 }
 
 .filterCard {
+  order: 2;
   min-width: 0;
 }
 
@@ -202,6 +203,7 @@
 }
 
 .overviewGrid {
+  order: 1;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: $spacing-md;
@@ -349,6 +351,7 @@
 
 
 .detailsCard {
+  order: 3;
   min-width: 0;
 }
 

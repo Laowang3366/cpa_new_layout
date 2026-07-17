@@ -23,7 +23,6 @@ import { useAuthStore } from '@/stores';
 import {
   usageRecordsApi,
   type UsageBreakdown,
-  type UsageGranularity,
   type UsagePricingConfig,
   type UsagePricingRule,
   type UsageRecord,
@@ -424,7 +423,6 @@ export function UsageRecordsPage() {
     start: range.start,
     end: range.end,
     status: 'all',
-    granularity: 'day',
   });
   const [filters, setFilters] = useState<UsageRecordFilters>(draftFilters);
   const [items, setItems] = useState<UsageRecord[]>([]);
@@ -444,13 +442,6 @@ export function UsageRecordsPage() {
     () => ({ ...filters, page, page_size: pageSize }),
     [filters, page, pageSize]
   );
-  const appliedStatsFilters = useMemo(() => {
-    const { page: currentPage, page_size: currentPageSize, ...rest } = appliedListFilters;
-    void currentPage;
-    void currentPageSize;
-    return rest;
-  }, [appliedListFilters]);
-
   const loadPricing = useCallback(async () => {
     try {
       const nextPricing = await usageRecordsApi.getPricing();
@@ -471,7 +462,7 @@ export function UsageRecordsPage() {
     try {
       const [listResponse, statsResponse] = await Promise.all([
         usageRecordsApi.list(appliedListFilters),
-        usageRecordsApi.stats(appliedStatsFilters),
+        usageRecordsApi.stats({}),
       ]);
       setItems(listResponse.items ?? []);
       setListTotal(Number.isFinite(listResponse.total) ? listResponse.total : 0);
@@ -484,7 +475,7 @@ export function UsageRecordsPage() {
     } finally {
       setLoading(false);
     }
-  }, [appliedListFilters, appliedStatsFilters, connectionStatus]);
+  }, [appliedListFilters, connectionStatus]);
 
   useEffect(() => {
     void loadData();
@@ -518,10 +509,6 @@ export function UsageRecordsPage() {
     { value: 'success', label: t('usage_records.status_success', { defaultValue: '成功' }) },
     { value: 'failed', label: t('usage_records.status_failed', { defaultValue: '失败' }) },
   ];
-  const granularityOptions = [
-    { value: 'day', label: t('usage_records.granularity_day', { defaultValue: '按天' }) },
-    { value: 'hour', label: t('usage_records.granularity_hour', { defaultValue: '按小时' }) },
-  ];
   const sortOptions = [
     { value: 'timestamp', label: t('usage_records.sort_time', { defaultValue: '时间' }) },
     { value: 'model', label: t('usage_records.sort_model', { defaultValue: '模型' }) },
@@ -545,7 +532,7 @@ export function UsageRecordsPage() {
   };
 
   const resetFilters = () => {
-    const next = { start: range.start, end: range.end, status: 'all' as UsageStatusFilter, granularity: 'day' as UsageGranularity };
+    const next = { start: range.start, end: range.end, status: 'all' as UsageStatusFilter };
     setDraftFilters(next);
     setFilters(next);
     setPage(1);
@@ -714,10 +701,6 @@ export function UsageRecordsPage() {
           <div className={styles.filterField}>
             <label>{t('usage_records.status', { defaultValue: '状态' })}</label>
             <Select value={draftFilters.status ?? 'all'} options={statusOptions} onChange={(value) => updateDraft({ status: value as UsageStatusFilter })} ariaLabel="Status" />
-          </div>
-          <div className={styles.filterField}>
-            <label>{t('usage_records.granularity', { defaultValue: '趋势粒度' })}</label>
-            <Select value={draftFilters.granularity ?? 'day'} options={granularityOptions} onChange={(value) => updateDraft({ granularity: value as UsageGranularity })} ariaLabel="Granularity" />
           </div>
           <div className={styles.filterField}>
             <label>{t('usage_records.sort_by', { defaultValue: '排序字段' })}</label>
