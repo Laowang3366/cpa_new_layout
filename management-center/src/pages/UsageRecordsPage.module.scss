@@ -197,9 +197,9 @@
 
 .clickFilter {
   display: grid;
-  grid-template-columns: 82px minmax(0, 1fr);
+  grid-template-columns: 68px minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .clickFilterLabel {
@@ -211,6 +211,8 @@
 
 .clickFilterOptions {
   display: flex;
+  width: max-content;
+  max-width: 100%;
   min-width: 0;
   height: 42px;
   overflow-x: auto;
@@ -222,9 +224,9 @@
 }
 
 .clickFilterOptions button {
-  min-width: 82px;
-  flex: 1 0 auto;
-  padding: 0 12px;
+  min-width: 68px;
+  flex: 0 0 auto;
+  padding: 0 11px;
   border: 0;
   border-right: 1px solid var(--border-color);
   background: transparent;
@@ -1009,7 +1011,7 @@
   .filterGrid,
   .overviewGrid { grid-template-columns: 1fr; }
   .detailsSearch { width: 100%; }
-  .clickFilter { grid-template-columns: 72px minmax(0, 1fr); }
+  .clickFilter { grid-template-columns: 64px minmax(0, 1fr); }
   .statCard { min-height: 94px; }
   .paginationBar { align-items: stretch; flex-direction: column; gap: 10px; }
   .paginationControls { width: 100%; justify-content: space-between; }
