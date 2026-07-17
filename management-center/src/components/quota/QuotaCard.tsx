@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { ReactElement, ReactNode } from 'react';
 import type { TFunction } from 'i18next';
 import { Button } from '@/components/ui/Button';
-import { IconRefreshCw } from '@/components/ui/icons';
+import { IconInfo, IconRefreshCw } from '@/components/ui/icons';
 import type { AuthFileItem, ResolvedTheme, ThemeColors } from '@/types';
 import { TYPE_COLORS } from '@/utils/quota';
 import styles from '@/pages/QuotaPage.module.scss';
@@ -225,7 +225,13 @@ export function QuotaCard<TState extends QuotaStatusState>({
         <td className={styles.quotaTableNameCell} title={item.name}>{item.name}</td>
         <td>{typeBadge}</td>
         <td>{subscriptionContent}</td>
-        <td className={styles.quotaTableValueCell}>{quotaContent}</td>
+        <td className={`${styles.quotaTableValueCell} ${displayType === 'codex' ? styles.quotaTableValueCellCompact : ''}`}>
+          <div className={styles.quotaUsageWindowTitle}>
+            {t('quota_management.usage_window')}
+            <IconInfo size={14} />
+          </div>
+          {quotaContent}
+        </td>
         <td className={styles.quotaTableActionsCell}>{actions}</td>
       </tr>
     );

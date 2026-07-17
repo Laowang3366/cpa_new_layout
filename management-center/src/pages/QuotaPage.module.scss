@@ -819,17 +819,21 @@
   .quotaBar {
     grid-column: 2;
     grid-row: 1;
-    width: 220px;
+    width: 40px;
     max-width: 100%;
+  }
+
+  .quotaBarPercent {
+    display: none;
   }
 
   .quotaRow {
     display: grid;
-    grid-template-columns: minmax(54px, auto) 220px auto;
+    grid-template-columns: 36px 40px auto;
     align-items: center;
     justify-content: start;
-    column-gap: 10px;
-    row-gap: 6px;
+    column-gap: 6px;
+    row-gap: 5px;
   }
 
   .quotaRowHeader {
@@ -840,6 +844,15 @@
     grid-column: 1;
     grid-row: 1;
     align-self: center;
+    padding: 3px 7px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--success-color) 16%, transparent);
+    color: color-mix(in srgb, var(--success-color) 82%, var(--text-primary));
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 16px;
+    text-align: center;
+    overflow: visible;
   }
 
   .quotaMeta {
@@ -848,6 +861,58 @@
     gap: 0;
     justify-self: start;
     align-self: center;
+    color: var(--text-secondary);
+    font-size: 11px;
+  }
+
+  .quotaPercent {
+    display: inline;
+    margin-right: 4px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .quotaWindowFiveHour .quotaModel {
+    background: color-mix(in srgb, #6366f1 14%, transparent);
+    color: #4f5bd5;
+  }
+
+  .quotaWindowWeekly .quotaModel {
+    background: color-mix(in srgb, #10b981 16%, transparent);
+    color: #078a65;
+  }
+}
+
+.quotaUsageWindowTitle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+
+  svg {
+    color: var(--text-tertiary);
+  }
+}
+
+.quotaTableValueCell:not(.quotaTableValueCellCompact) {
+  .quotaRow {
+    grid-template-columns: minmax(72px, auto) 160px auto;
+  }
+
+  .quotaBar {
+    width: 160px;
+  }
+
+  .quotaModel {
+    padding: 0;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
   }
 }
 

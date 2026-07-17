@@ -1024,14 +1024,24 @@ const renderCodexItems = (
       const windowLabel = window.labelKey
         ? t(window.labelKey, window.labelParams as Record<string, string | number>)
         : window.label;
+      const compactWindowLabel = window.id.includes('five-hour')
+        ? '5h'
+        : window.id.includes('weekly')
+          ? '7d'
+          : windowLabel;
+      const windowClassName = window.id.includes('five-hour')
+        ? `${styleMap.quotaRow} ${styleMap.quotaWindowFiveHour}`
+        : window.id.includes('weekly')
+          ? `${styleMap.quotaRow} ${styleMap.quotaWindowWeekly}`
+          : styleMap.quotaRow;
 
       return h(
         'div',
-        { key: window.id, className: styleMap.quotaRow },
+        { key: window.id, className: windowClassName },
         h(
           'div',
           { className: styleMap.quotaRowHeader },
-          h('span', { className: styleMap.quotaModel }, windowLabel),
+          h('span', { className: styleMap.quotaModel }, compactWindowLabel),
           h(
             'div',
             { className: styleMap.quotaMeta },
