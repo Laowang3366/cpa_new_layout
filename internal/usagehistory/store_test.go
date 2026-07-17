@@ -75,7 +75,7 @@ func TestStorePersistsFiltersAndRecalculatesCost(t *testing.T) {
 	if stats.AverageLatencyMs != 200 || len(stats.Trend) != 2 || len(stats.Models) != 2 {
 		t.Fatalf("stats aggregation = %+v", stats)
 	}
-	if stats.Models[1].Key != "gpt-5" || stats.Models[1].InputTokens != 1000 || stats.Models[1].CachedTokens != 800 {
+	if stats.Models[1].Key != "gpt-5" || stats.Models[1].InputTokens != 1000 || stats.Models[1].OutputTokens != 500 || stats.Models[1].CachedTokens != 800 {
 		t.Fatalf("model token breakdown = %+v", stats.Models)
 	}
 

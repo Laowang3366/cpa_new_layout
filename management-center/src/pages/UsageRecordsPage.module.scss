@@ -212,6 +212,71 @@
   min-height: 330px;
 }
 
+.breakdownTableWrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.breakdownTable {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdownTable th {
+  padding: 0 10px 10px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.breakdownTable td {
+  padding: 11px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.breakdownTable tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.breakdownTable tbody tr:hover {
+  background: color-mix(in srgb, var(--bg-hover) 60%, transparent);
+}
+
+.breakdownName {
+  max-width: 190px;
+  overflow: hidden;
+  font-weight: 650;
+  text-overflow: ellipsis;
+}
+
+.breakdownTokens {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+
+.breakdownTokens span + span::before {
+  margin-right: 8px;
+  color: var(--border-primary);
+  content: '/';
+}
+
+.breakdownHitRate,
+.breakdownCost {
+  color: #138a55;
+  font-weight: 700;
+}
+
 .breakdownList {
   display: flex;
   flex-direction: column;

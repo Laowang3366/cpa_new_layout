@@ -43,6 +43,7 @@ export interface UsageBreakdown {
   failures: number;
   tokens: number;
   input_tokens: number;
+  output_tokens: number;
   cached_tokens: number;
   cost: number;
   cost_known: boolean;

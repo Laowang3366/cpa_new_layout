@@ -279,38 +279,46 @@ function BreakdownCard({
   title,
   items,
   tokenCurrency,
+  firstColumnLabel,
 }: {
   title: string;
   items: UsageBreakdown[];
   tokenCurrency: string;
+  firstColumnLabel: string;
 }) {
-  const maxTokens = Math.max(1, ...items.map((item) => item.tokens));
+  const { t } = useTranslation();
   return (
     <Card title={title} className={styles.breakdownCard}>
       {items.length === 0 ? (
         <div className={styles.noData}>--</div>
       ) : (
-        <div className={styles.breakdownList}>
-          {items.slice(0, 8).map((item) => (
-            <div className={styles.breakdownRow} key={item.key}>
-              <div className={styles.breakdownHeading}>
-                <span className={styles.breakdownKey} title={item.key}>{item.key || 'unknown'}</span>
-                <span className={styles.breakdownMeta}>
-                  {formatInteger(item.requests)} {item.requests === 1 ? 'request' : 'requests'}
-                </span>
-              </div>
-              <div className={styles.breakdownBarTrack}>
-                <span
-                  className={styles.breakdownBar}
-                  style={{ width: `${Math.max(2, (item.tokens / maxTokens) * 100)}%` }}
-                />
-              </div>
-              <div className={styles.breakdownValues}>
-                <span>{formatTokens(item.tokens)} tokens</span>
-                <span>{item.cost_known ? formatCost(item.cost, tokenCurrency) : '--'}</span>
-              </div>
-            </div>
-          ))}
+        <div className={styles.breakdownTableWrap}>
+          <table className={styles.breakdownTable}>
+            <thead>
+              <tr>
+                <th>{firstColumnLabel}</th>
+                <th>{t('usage_records.requests', { defaultValue: '请求数' })}</th>
+                <th>{t('usage_records.tokens', { defaultValue: 'Token' })}</th>
+                <th>{t('usage_records.cache_hit_rate', { defaultValue: '缓存命中率' })}</th>
+                <th>{t('usage_records.cost', { defaultValue: '消费金额' })}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.slice(0, 8).map((item) => (
+                <tr key={item.key}>
+                  <td className={styles.breakdownName} title={item.key}>{item.key || 'unknown'}</td>
+                  <td>{formatInteger(item.requests)}</td>
+                  <td className={styles.breakdownTokens}>
+                    <span>{t('usage_records.input_tokens_short', { defaultValue: '输入' })} {formatTokens(item.input_tokens)}</span>
+                    <span>{t('usage_records.output_tokens_short', { defaultValue: '输出' })} {formatTokens(item.output_tokens)}</span>
+                    <span>{t('usage_records.cache_tokens_short', { defaultValue: '缓存' })} {formatTokens(item.cached_tokens)}</span>
+                  </td>
+                  <td className={styles.breakdownHitRate}>{formatCacheHitRate(item.cached_tokens, item.input_tokens)}</td>
+                  <td className={styles.breakdownCost}>{item.cost_known ? formatSummaryCost(item.cost, tokenCurrency) : '--'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </Card>
@@ -747,8 +755,8 @@ export function UsageRecordsPage() {
       </Card>
 
       <div className={styles.overviewGrid}>
-        <BreakdownCard title={t('usage_records.models', { defaultValue: '模型分布' })} items={stats.models} tokenCurrency={pricing.currency} />
-        <BreakdownCard title={t('usage_records.accounts', { defaultValue: '账号分布' })} items={stats.accounts} tokenCurrency={pricing.currency} />
+        <BreakdownCard title={t('usage_records.models', { defaultValue: '模型分布' })} items={stats.models} tokenCurrency={pricing.currency} firstColumnLabel={t('usage_records.model', { defaultValue: '模型' })} />
+        <BreakdownCard title={t('usage_records.accounts', { defaultValue: '账号分布' })} items={stats.accounts} tokenCurrency={pricing.currency} firstColumnLabel={t('usage_records.account', { defaultValue: '账号' })} />
         <ModelCacheCard title={t('usage_records.model_cache_hits', { defaultValue: '模型缓存命中' })} items={stats.models} />
         <TrendChart title={t('usage_records.trend', { defaultValue: 'Token 使用趋势' })} points={stats.trend} />
       </div>

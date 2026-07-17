@@ -99,6 +99,7 @@ type Breakdown struct {
 	Failures     int64   `json:"failures"`
 	Tokens       int64   `json:"tokens"`
 	InputTokens  int64   `json:"input_tokens"`
+	OutputTokens int64   `json:"output_tokens"`
 	CachedTokens int64   `json:"cached_tokens"`
 	Cost         float64 `json:"cost"`
 	CostKnown    bool    `json:"cost_known"`
@@ -784,6 +785,7 @@ func addBreakdown(target map[string]*Breakdown, key string, record Record) {
 	}
 	item.Tokens += record.Tokens.TotalTokens
 	item.InputTokens += record.Tokens.InputTokens
+	item.OutputTokens += record.Tokens.OutputTokens
 	item.CachedTokens += record.Tokens.CachedTokens
 	item.Cost += record.Cost
 	item.CostKnown = item.CostKnown && record.CostKnown
