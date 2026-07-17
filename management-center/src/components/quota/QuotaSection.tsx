@@ -22,7 +22,7 @@ import type { QuotaStatusState } from './QuotaCard';
 import { useQuotaLoader } from './useQuotaLoader';
 import type { QuotaConfig } from './quotaConfigs';
 import { useGridColumns } from './useGridColumns';
-import { IconRefreshCw } from '@/components/ui/icons';
+import { IconRefreshCw, IconTimer } from '@/components/ui/icons';
 import styles from '@/pages/QuotaPage.module.scss';
 
 type QuotaUpdater<T> = T | ((prev: T) => T);
@@ -301,23 +301,24 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
     const isResettingQuota = resettingQuotaName === item.name;
     const canUseQuotaAction =
       !disabled && !item.disabled && itemQuota?.status !== 'loading';
-    const showResetQuotaAction =
+    const canResetQuota =
       itemQuota !== undefined && Boolean(config.canResetQuota?.(itemQuota));
+    const showResetQuotaAction = Boolean(config.resetQuota) && (listMode || canResetQuota);
     const resetQuotaAction =
-      config.resetQuota && showResetQuotaAction ? (
+      showResetQuotaAction ? (
         <Button
           type="button"
           variant="secondary"
           size="sm"
           className={styles.quotaResetCreditButton}
           onClick={() => resetQuotaForFile(item)}
-          disabled={!canUseQuotaAction || isResettingQuota}
+          disabled={!canUseQuotaAction || isResettingQuota || !canResetQuota}
           loading={isResettingQuota}
           title={t('codex_quota.reset_button')}
           aria-label={t('codex_quota.reset_button')}
         >
-          {!isResettingQuota && <IconRefreshCw size={14} />}
-          {t('codex_quota.reset_button')}
+          {!isResettingQuota && (listMode ? <IconTimer size={15} /> : <IconRefreshCw size={14} />)}
+          {!listMode && t('codex_quota.reset_button')}
         </Button>
       ) : undefined;
 

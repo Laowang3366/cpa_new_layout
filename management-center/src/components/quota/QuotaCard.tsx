@@ -164,9 +164,10 @@ export function QuotaCard<TState extends QuotaStatusState>({
           disabled={!canRefresh || quotaLoading}
           loading={quotaLoading}
           title={t('auth_files.quota_refresh_hint')}
+          aria-label={t('auth_files.quota_refresh_hint')}
         >
           {!quotaLoading && <IconRefreshCw size={14} />}
-          {t('auth_files.quota_refresh_single')}
+          {!listMode && t('auth_files.quota_refresh_single')}
         </Button>
       )}
     </div>
