@@ -32,10 +32,10 @@
 
 .options {
   display: grid;
-  grid-template-columns: repeat(4, minmax(72px, 1fr));
+  grid-template-columns: repeat(4, minmax(62px, 1fr));
   gap: 6px;
-  width: min(410px, calc(100% - 84px));
-  height: 42px;
+  width: min(340px, calc(100% - 84px));
+  height: 36px;
   box-sizing: border-box;
   padding: 3px;
   border: 1px solid var(--border-color);
@@ -60,8 +60,8 @@
 }
 
 .option {
-  height: 34px;
-  padding: 0 12px;
+  height: 28px;
+  padding: 0 9px;
   border: 0;
   border-radius: 5px;
   color: var(--text-secondary);

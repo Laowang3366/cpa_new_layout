@@ -463,7 +463,7 @@
   align-items: center;
   gap: 3px;
   width: auto;
-  height: 42px;
+  height: 36px;
   padding: 3px;
   border: 1px solid var(--border-color);
   border-radius: 7px;
@@ -471,8 +471,8 @@
   box-sizing: border-box;
 
   button {
-    min-width: 72px;
-    height: 34px;
+    min-width: 62px;
+    height: 28px;
     flex: 0 0 auto;
     padding: 0 10px;
     border: 0;
@@ -530,7 +530,7 @@
   align-items: center;
   gap: 3px;
   width: auto;
-  height: 42px;
+  height: 36px;
   padding: 3px;
   border: 1px solid var(--border-color);
   border-radius: 7px;
@@ -538,10 +538,10 @@
   box-sizing: border-box;
 
   button {
-    height: 34px;
-    min-width: 76px;
+    height: 28px;
+    min-width: 64px;
     flex: 0 0 auto;
-    padding: 0 10px;
+    padding: 0 8px;
     border: 0;
     border-radius: 5px;
     color: var(--text-secondary);
