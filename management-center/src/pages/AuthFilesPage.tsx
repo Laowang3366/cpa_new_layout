@@ -571,10 +571,11 @@ export function AuthFilesPage() {
     if (targetFiles.length === 0) return;
     const data = await quotaGuardianApi.snapshots();
     const hydrated = hydrateGuardianSnapshots(targetFiles, data.snapshots, t);
-    setClaudeQuota((previous) => ({ ...previous, ...hydrated.claude }));
-    setCodexQuota((previous) => ({ ...previous, ...hydrated.codex }));
-    setKimiQuota((previous) => ({ ...previous, ...hydrated.kimi }));
-    setXaiQuota((previous) => ({ ...previous, ...hydrated.xai }));
+    // Guardian snapshots are a fallback; a manual refresh may be newer than the last guardian run.
+    setClaudeQuota((previous) => ({ ...hydrated.claude, ...previous }));
+    setCodexQuota((previous) => ({ ...hydrated.codex, ...previous }));
+    setKimiQuota((previous) => ({ ...hydrated.kimi, ...previous }));
+    setXaiQuota((previous) => ({ ...hydrated.xai, ...previous }));
   }, [setClaudeQuota, setCodexQuota, setKimiQuota, setXaiQuota, t]);
 
   const refreshQuotasForFiles = useCallback(async (targetFiles: AuthFileItem[]) => {

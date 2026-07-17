@@ -3,6 +3,7 @@
  */
 
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import type {
   AntigravityQuotaState,
   ClaudeQuotaState,
@@ -35,43 +36,58 @@ const resolveUpdater = <T>(updater: QuotaUpdater<T>, prev: T): T => {
   return updater;
 };
 
-export const useQuotaStore = create<QuotaStoreState>((set) => ({
-  cacheGeneration: 0,
-  antigravityQuota: {},
-  claudeQuota: {},
-  codexQuota: {},
-  kimiQuota: {},
-  xaiQuota: {},
-  setAntigravityQuota: (updater) =>
-    set((state) => ({
-      antigravityQuota: resolveUpdater(updater, state.antigravityQuota),
-    })),
-  setClaudeQuota: (updater) =>
-    set((state) => ({
-      claudeQuota: resolveUpdater(updater, state.claudeQuota),
-    })),
-  setCodexQuota: (updater) =>
-    set((state) => ({
-      codexQuota: resolveUpdater(updater, state.codexQuota),
-    })),
-  setKimiQuota: (updater) =>
-    set((state) => ({
-      kimiQuota: resolveUpdater(updater, state.kimiQuota),
-    })),
-  setXaiQuota: (updater) =>
-    set((state) => ({
-      xaiQuota: resolveUpdater(updater, state.xaiQuota),
-    })),
-  clearQuotaCache: () =>
-    set((state) => ({
-      cacheGeneration: state.cacheGeneration + 1,
+export const useQuotaStore = create<QuotaStoreState>()(
+  persist(
+    (set) => ({
+      cacheGeneration: 0,
       antigravityQuota: {},
       claudeQuota: {},
       codexQuota: {},
       kimiQuota: {},
       xaiQuota: {},
-    })),
-}));
+      setAntigravityQuota: (updater) =>
+        set((state) => ({
+          antigravityQuota: resolveUpdater(updater, state.antigravityQuota),
+        })),
+      setClaudeQuota: (updater) =>
+        set((state) => ({
+          claudeQuota: resolveUpdater(updater, state.claudeQuota),
+        })),
+      setCodexQuota: (updater) =>
+        set((state) => ({
+          codexQuota: resolveUpdater(updater, state.codexQuota),
+        })),
+      setKimiQuota: (updater) =>
+        set((state) => ({
+          kimiQuota: resolveUpdater(updater, state.kimiQuota),
+        })),
+      setXaiQuota: (updater) =>
+        set((state) => ({
+          xaiQuota: resolveUpdater(updater, state.xaiQuota),
+        })),
+      clearQuotaCache: () =>
+        set((state) => ({
+          cacheGeneration: state.cacheGeneration + 1,
+          antigravityQuota: {},
+          claudeQuota: {},
+          codexQuota: {},
+          kimiQuota: {},
+          xaiQuota: {},
+        })),
+    }),
+    {
+      name: 'cpa-quota-cache-v1',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({
+        antigravityQuota: state.antigravityQuota,
+        claudeQuota: state.claudeQuota,
+        codexQuota: state.codexQuota,
+        kimiQuota: state.kimiQuota,
+        xaiQuota: state.xaiQuota,
+      }),
+    }
+  )
+);
 
 export const captureQuotaCacheGeneration = (): number =>
   useQuotaStore.getState().cacheGeneration;
