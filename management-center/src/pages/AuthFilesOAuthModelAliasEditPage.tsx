@@ -150,7 +150,7 @@ export function AuthFilesOAuthModelAliasEditPage() {
       navigate(-1);
       return;
     }
-    navigate('/auth-files', { replace: true });
+    navigate('/oauth-config', { replace: true });
   }, [location.state, navigate]);
 
   const swipeRef = useEdgeSwipeBack({ onBack: handleBack });

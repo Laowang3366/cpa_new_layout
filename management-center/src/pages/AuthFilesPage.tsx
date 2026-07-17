@@ -11,7 +11,6 @@ import {
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { useNavigate } from 'react-router-dom';
 import { animate } from 'motion/mini';
 import type { AnimationPlaybackControlsWithThen } from 'motion-dom';
 import { useInterval } from '@/hooks/useInterval';
@@ -59,8 +58,6 @@ import { AuthFileCard } from '@/features/authFiles/components/AuthFileCard';
 import { AuthFileList, type AuthFileListColumn } from '@/features/authFiles/components/AuthFileList';
 import { AuthFileModelsModal } from '@/features/authFiles/components/AuthFileModelsModal';
 import { AuthFilesPrefixProxyEditorModal } from '@/features/authFiles/components/AuthFilesPrefixProxyEditorModal';
-import { OAuthExcludedCard } from '@/features/authFiles/components/OAuthExcludedCard';
-import { OAuthModelAliasCard } from '@/features/authFiles/components/OAuthModelAliasCard';
 import { useAuthFilesData } from '@/features/authFiles/hooks/useAuthFilesData';
 import { useAuthFilesModels } from '@/features/authFiles/hooks/useAuthFilesModels';
 import { useAuthFilesOauth } from '@/features/authFiles/hooks/useAuthFilesOauth';
@@ -172,7 +169,6 @@ export function AuthFilesPage() {
   const setXaiQuota = useQuotaStore((state) => state.setXaiQuota);
   const pageTransitionLayer = usePageTransitionLayer();
   const isCurrentLayer = pageTransitionLayer ? pageTransitionLayer.status === 'current' : true;
-  const navigate = useNavigate();
 
   const [filter, setFilter] = useState<'all' | string>('all');
   const [statusFilterMode, setStatusFilterMode] = useState<AuthFilesStatusFilterMode>('all');
@@ -194,7 +190,6 @@ export function AuthFilesPage() {
     regular: DEFAULT_REGULAR_PAGE_SIZE,
     compact: DEFAULT_COMPACT_PAGE_SIZE,
   });
-  const [viewMode, setViewMode] = useState<'diagram' | 'list'>('list');
   const [sortMode, setSortMode] = useState<AuthFilesSortMode>('default');
   const columnVisibilityRef = useRef<HTMLDetailsElement | null>(null);
   const columnOptions: Array<{ key: AuthFileListColumn; label: string }> = [
@@ -259,20 +254,9 @@ export function AuthFilesPage() {
 
   const {
     excluded,
-    excludedError,
-    modelAlias,
-    modelAliasError,
-    allProviderModels,
     loadExcluded,
     loadModelAlias,
-    deleteExcluded,
-    deleteModelAlias,
-    handleMappingUpdate,
-    handleDeleteLink,
-    handleToggleFork,
-    handleRenameAlias,
-    handleDeleteAlias,
-  } = useAuthFilesOauth({ viewMode, files });
+  } = useAuthFilesOauth({ viewMode: 'list', files });
 
   const {
     modelsModalOpen,
@@ -673,36 +657,6 @@ export function AuthFilesPage() {
       );
     },
     [showNotification, t]
-  );
-
-  const openExcludedEditor = useCallback(
-    (provider?: string) => {
-      const providerValue = (provider || (filter !== 'all' ? String(filter) : '')).trim();
-      const params = new URLSearchParams();
-      if (providerValue) {
-        params.set('provider', providerValue);
-      }
-      const nextSearch = params.toString();
-      navigate(`/auth-files/oauth-excluded${nextSearch ? `?${nextSearch}` : ''}`, {
-        state: { fromAuthFiles: true },
-      });
-    },
-    [filter, navigate]
-  );
-
-  const openModelAliasEditor = useCallback(
-    (provider?: string) => {
-      const providerValue = (provider || (filter !== 'all' ? String(filter) : '')).trim();
-      const params = new URLSearchParams();
-      if (providerValue) {
-        params.set('provider', providerValue);
-      }
-      const nextSearch = params.toString();
-      navigate(`/auth-files/oauth-model-alias${nextSearch ? `?${nextSearch}` : ''}`, {
-        state: { fromAuthFiles: true },
-      });
-    },
-    [filter, navigate]
   );
 
   useActionBarHeightVar(
@@ -1119,32 +1073,6 @@ export function AuthFilesPage() {
           </div>
         </div>
       </Card>
-
-      <OAuthExcludedCard
-        disableControls={disableControls}
-        excludedError={excludedError}
-        excluded={excluded}
-        onAdd={() => openExcludedEditor()}
-        onEdit={openExcludedEditor}
-        onDelete={deleteExcluded}
-      />
-
-      <OAuthModelAliasCard
-        disableControls={disableControls}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        onAdd={() => openModelAliasEditor()}
-        onEditProvider={openModelAliasEditor}
-        onDeleteProvider={deleteModelAlias}
-        modelAliasError={modelAliasError}
-        modelAlias={modelAlias}
-        allProviderModels={allProviderModels}
-        onUpdate={handleMappingUpdate}
-        onDeleteLink={handleDeleteLink}
-        onToggleFork={handleToggleFork}
-        onRenameAlias={handleRenameAlias}
-        onDeleteAlias={handleDeleteAlias}
-      />
 
       <AuthFileModelsModal
         open={modelsModalOpen}

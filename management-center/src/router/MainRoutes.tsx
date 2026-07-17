@@ -5,6 +5,7 @@ import { AuthFilesPage } from '@/pages/AuthFilesPage';
 import { AuthFilesOAuthExcludedEditPage } from '@/pages/AuthFilesOAuthExcludedEditPage';
 import { AuthFilesOAuthModelAliasEditPage } from '@/pages/AuthFilesOAuthModelAliasEditPage';
 import { OAuthPage } from '@/pages/OAuthPage';
+import { OAuthConfigPage } from '@/pages/OAuthConfigPage';
 import { QuotaPage } from '@/pages/QuotaPage';
 import { QuotaGuardianPage } from '@/pages/QuotaGuardianPage';
 import { UsageRecordsPage } from '@/pages/UsageRecordsPage';
@@ -29,6 +30,9 @@ const createMainRoutes = (supportsPlugin: boolean) => [
   { path: '/auth-files/oauth-excluded', element: <AuthFilesOAuthExcludedEditPage /> },
   { path: '/auth-files/oauth-model-alias', element: <AuthFilesOAuthModelAliasEditPage /> },
   { path: '/oauth', element: <OAuthPage /> },
+  { path: '/oauth-config', element: <OAuthConfigPage /> },
+  { path: '/oauth-config/excluded', element: <AuthFilesOAuthExcludedEditPage /> },
+  { path: '/oauth-config/model-alias', element: <AuthFilesOAuthModelAliasEditPage /> },
   { path: '/quota', element: <QuotaPage /> },
   { path: '/quota-guardian', element: <QuotaGuardianPage /> },
   { path: '/usage-records', element: <UsageRecordsPage /> },

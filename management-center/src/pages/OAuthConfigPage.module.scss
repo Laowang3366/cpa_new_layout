@@ -1,0 +1,22 @@
+@use '../styles/variables' as *;
+
+.container {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: $spacing-lg;
+  padding-bottom: $spacing-lg;
+}
+
+.header h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.header p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
