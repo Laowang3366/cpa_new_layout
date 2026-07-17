@@ -1024,11 +1024,22 @@
 }
 
 .authFileRemainingQuotaItem {
-  display: flex !important;
-  flex-direction: column;
-  gap: 1px;
+  display: inline-flex !important;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 5px;
   max-width: 100%;
   min-width: 0;
+  white-space: nowrap;
+}
+
+.authFileRemainingQuotaReset {
+  overflow: hidden;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .authFileRemainingQuotaLabel {
