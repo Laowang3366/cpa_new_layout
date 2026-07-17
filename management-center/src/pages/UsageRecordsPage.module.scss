@@ -159,108 +159,6 @@
   font-variant-numeric: tabular-nums;
 }
 
-.filterCard {
-  order: 2;
-  min-width: 0;
-}
-
-.filterGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 0.85fr);
-  gap: 12px 14px;
-  align-items: stretch;
-
-  :global(.form-group) {
-    min-width: 0;
-    margin-bottom: 0;
-  }
-
-  :global(.form-group label),
-  .filterField > label {
-    display: block;
-    margin-bottom: 5px;
-    color: var(--text-secondary);
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  :global(.input),
-  :global(.select-trigger) {
-    min-width: 0;
-  }
-}
-
-.filterField,
-.clickFilter {
-  min-width: 0;
-}
-
-.clickFilter {
-  display: grid;
-  grid-template-columns: 68px minmax(0, 1fr);
-  align-items: center;
-  gap: 4px;
-}
-
-.clickFilterLabel {
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 650;
-  white-space: nowrap;
-}
-
-.clickFilterOptions {
-  display: flex;
-  width: max-content;
-  max-width: 100%;
-  min-width: 0;
-  height: 42px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  border: 1px solid var(--border-color);
-  border-radius: $radius-md;
-  background: var(--bg-primary);
-  scrollbar-width: thin;
-}
-
-.clickFilterOptions button {
-  min-width: 68px;
-  flex: 0 0 auto;
-  padding: 0 11px;
-  border: 0;
-  border-right: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color $transition-fast, background-color $transition-fast;
-}
-
-.clickFilterOptions button:last-child {
-  border-right: 0;
-}
-
-.clickFilterOptions button:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover);
-}
-
-.clickFilterOptions .clickFilterOptionActive {
-  background: var(--primary-color);
-  color: var(--primary-contrast, #fff);
-}
-
-.filterActions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: $spacing-sm;
-  min-height: 40px;
-}
-
 .overviewGrid {
   order: 1;
   display: grid;
@@ -414,6 +312,55 @@
   min-width: 0;
 }
 
+.detailsTitleGroup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.detailsTitleGroup > span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.detailsTimeRange {
+  display: inline-flex;
+  height: 32px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: $radius-md;
+  background: var(--bg-primary);
+}
+
+.detailsTimeRange button {
+  min-width: 64px;
+  padding: 0 9px;
+  border: 0;
+  border-right: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.detailsTimeRange button:last-child {
+  border-right: 0;
+}
+
+.detailsTimeRange button:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.detailsTimeRange .detailsTimeRangeActive {
+  background: var(--primary-color);
+  color: var(--primary-contrast, #fff);
+}
+
 .detailsSearch {
   width: min(380px, 48vw);
 
@@ -476,6 +423,27 @@
   color: inherit;
   font: inherit;
   cursor: pointer;
+}
+
+.sortableHeaderCell,
+.tableHeaderFilter {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.tableHeaderSelect {
+  width: 108px;
+  min-width: 108px;
+
+  :global(.select-trigger) {
+    min-height: 30px;
+    height: 30px;
+    padding-inline: 8px;
+    background: var(--bg-primary);
+    font-size: 11px;
+    font-weight: 500;
+  }
 }
 
 .sortableHeader:hover,
@@ -991,7 +959,6 @@
 
 @media (max-width: 1120px) {
   .statsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .filterGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .modelPricingRow { grid-template-columns: minmax(120px, 1.4fr) 32px repeat(2, minmax(70px, 1fr)) 32px; }
   .modelPricingRow .pricingField:nth-of-type(n + 3) { display: none; }
 }
@@ -999,7 +966,6 @@
 @media (max-width: 820px) {
   .pageHeader { flex-direction: column; }
   .headerActions { justify-content: flex-start; }
-  .filterGrid,
   .overviewGrid { grid-template-columns: 1fr 1fr; }
   .pricingGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .modelPricingHeader { flex-direction: column; }
@@ -1008,10 +974,10 @@
 
 @media (max-width: 560px) {
   .statsGrid,
-  .filterGrid,
   .overviewGrid { grid-template-columns: 1fr; }
+  .detailsTitleGroup { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .detailsTimeRange { max-width: calc(100vw - 64px); overflow-x: auto; }
   .detailsSearch { width: 100%; }
-  .clickFilter { grid-template-columns: 64px minmax(0, 1fr); }
   .statCard { min-height: 94px; }
   .paginationBar { align-items: stretch; flex-direction: column; gap: 10px; }
   .paginationControls { width: 100%; justify-content: space-between; }

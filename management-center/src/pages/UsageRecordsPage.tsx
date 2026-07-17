@@ -276,56 +276,29 @@ function SortableHeader({
   activeField,
   direction,
   onSort,
+  extra,
 }: {
   label: string;
   field: UsageSortField;
   activeField: UsageSortField;
   direction: 'asc' | 'desc';
   onSort: (field: UsageSortField) => void;
+  extra?: React.ReactNode;
 }) {
   const active = field === activeField;
   return (
     <th aria-sort={active ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
-      <button type="button" className={`${styles.sortableHeader} ${active ? styles.sortableHeaderActive : ''}`} onClick={() => onSort(field)}>
-        <span>{label}</span>
-        <span className={styles.sortDirection} aria-hidden="true">
-          <IconChevronUp className={active && direction === 'asc' ? styles.sortDirectionActive : ''} size={11} />
-          <IconChevronDown className={active && direction === 'desc' ? styles.sortDirectionActive : ''} size={11} />
-        </span>
-      </button>
-    </th>
-  );
-}
-
-function ClickFilter({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  options: Array<{ value: string; label: string }>;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className={styles.clickFilter}>
-      <span className={styles.clickFilterLabel}>{label}</span>
-      <div className={styles.clickFilterOptions} role="group" aria-label={label}>
-        {options.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            className={value === option.value ? styles.clickFilterOptionActive : ''}
-            onClick={() => onChange(option.value)}
-            aria-pressed={value === option.value}
-            title={option.label}
-          >
-            {option.label}
-          </button>
-        ))}
+      <div className={styles.sortableHeaderCell}>
+        <button type="button" className={`${styles.sortableHeader} ${active ? styles.sortableHeaderActive : ''}`} onClick={() => onSort(field)}>
+          <span>{label}</span>
+          <span className={styles.sortDirection} aria-hidden="true">
+            <IconChevronUp className={active && direction === 'asc' ? styles.sortDirectionActive : ''} size={11} />
+            <IconChevronDown className={active && direction === 'desc' ? styles.sortDirectionActive : ''} size={11} />
+          </span>
+        </button>
+        {extra}
       </div>
-    </div>
+    </th>
   );
 }
 
@@ -706,41 +679,29 @@ export function UsageRecordsPage() {
         />
       </div>
 
-      <Card className={styles.filterCard}>
-        <div className={styles.filterGrid}>
-          <ClickFilter
-            label={t('usage_records.time_filter', { defaultValue: '时间筛选' })}
-            value={timeRange}
-            options={[
-              { value: '24h', label: t('usage_records.range_24h', { defaultValue: '近24小时' }) },
-              { value: '3d', label: t('usage_records.range_3d', { defaultValue: '近3天' }) },
-              { value: '7d', label: t('usage_records.range_7d', { defaultValue: '近7天' }) },
-              { value: '30d', label: t('usage_records.range_30d', { defaultValue: '近一个月' }) },
-            ]}
-            onChange={(value) => { setTimeRange(value as UsageTimeRange); setPage(1); }}
-          />
-          <ClickFilter
-            label={t('usage_records.status_filter', { defaultValue: '状态筛选' })}
-            value={draftFilters.status ?? 'all'}
-            options={statusOptions}
-            onChange={(value) => updateDraft({ status: value as UsageStatusFilter })}
-          />
-          <ClickFilter
-            label="Provider"
-            value={draftFilters.provider ?? ''}
-            options={providerOptions}
-            onChange={(value) => updateDraft({ provider: value })}
-          />
-        </div>
-      </Card>
-
       <div className={styles.overviewGrid}>
         <BreakdownCard title={t('usage_records.models', { defaultValue: '模型分布' })} items={stats.models} tokenCurrency={pricing.currency} firstColumnLabel={t('usage_records.model', { defaultValue: '模型' })} />
         <BreakdownCard title={t('usage_records.accounts', { defaultValue: '账号分布' })} items={stats.accounts} tokenCurrency={pricing.currency} firstColumnLabel={t('usage_records.account', { defaultValue: '账号' })} />
       </div>
 
       <Card
-        title={t('usage_records.details', { defaultValue: '使用明细' })}
+        title={(
+          <div className={styles.detailsTitleGroup}>
+            <span>{t('usage_records.details', { defaultValue: '使用明细' })}</span>
+            <div className={styles.detailsTimeRange} role="group" aria-label={t('usage_records.time_filter', { defaultValue: '时间筛选' })}>
+              {([
+                ['24h', t('usage_records.range_24h', { defaultValue: '近24小时' })],
+                ['3d', t('usage_records.range_3d', { defaultValue: '近3天' })],
+                ['7d', t('usage_records.range_7d', { defaultValue: '近7天' })],
+                ['30d', t('usage_records.range_30d', { defaultValue: '近一个月' })],
+              ] as const).map(([value, label]) => (
+                <button key={value} type="button" className={timeRange === value ? styles.detailsTimeRangeActive : ''} onClick={() => { setTimeRange(value); setPage(1); }} aria-pressed={timeRange === value}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         extra={(
           <div className={styles.detailsSearch}>
             <Input
@@ -768,7 +729,14 @@ export function UsageRecordsPage() {
                   <tr>
                     <SortableHeader label={t('usage_records.time', { defaultValue: '时间' })} field="timestamp" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
                     <SortableHeader label={t('usage_records.model', { defaultValue: '模型' })} field="model" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
-                    <SortableHeader label={t('usage_records.provider', { defaultValue: 'Provider' })} field="provider" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
+                    <SortableHeader
+                      label={t('usage_records.provider', { defaultValue: 'Provider' })}
+                      field="provider"
+                      activeField={draftFilters.sort_by ?? 'timestamp'}
+                      direction={draftFilters.sort_order ?? 'desc'}
+                      onSort={handleSort}
+                      extra={<Select size="sm" className={styles.tableHeaderSelect} value={draftFilters.provider ?? ''} options={providerOptions} onChange={(value) => updateDraft({ provider: value })} ariaLabel="Provider" />}
+                    />
                     <th>{t('usage_records.account', { defaultValue: '账号' })}</th>
                     <th>{t('usage_records.endpoint', { defaultValue: '端点' })}</th>
                     <th>{t('usage_records.reasoning_effort', { defaultValue: '思考等级' })}</th>
@@ -776,7 +744,12 @@ export function UsageRecordsPage() {
                     <th>{t('usage_records.cache_hit_rate', { defaultValue: '缓存命中率' })}</th>
                     <SortableHeader label={t('usage_records.cost', { defaultValue: '费用' })} field="cost" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
                     <SortableHeader label={t('usage_records.latency', { defaultValue: '耗时' })} field="latency" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
-                    <th>{t('usage_records.status', { defaultValue: '状态' })}</th>
+                    <th>
+                      <div className={styles.tableHeaderFilter}>
+                        <span>{t('usage_records.status', { defaultValue: '状态' })}</span>
+                        <Select size="sm" className={styles.tableHeaderSelect} value={draftFilters.status ?? 'all'} options={statusOptions} onChange={(value) => updateDraft({ status: value as UsageStatusFilter })} ariaLabel={t('usage_records.status', { defaultValue: '状态' })} />
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
