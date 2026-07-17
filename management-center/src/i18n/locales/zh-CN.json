@@ -1080,8 +1080,7 @@
   "quota_management": {
     "title": "配额管理",
     "description": "集中查看 OAuth 额度与剩余情况",
-    "refresh_all_credentials": "刷新全部凭证",
-    "usage_window": "用量窗口"
+    "refresh_all_credentials": "刷新全部凭证"
   },
   "plugin_management": {
     "title": "插件管理",

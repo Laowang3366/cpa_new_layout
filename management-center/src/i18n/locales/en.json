@@ -1080,8 +1080,7 @@
   "quota_management": {
     "title": "Quota Management",
     "description": "Monitor OAuth quota status for Antigravity, Codex, Claude, Kimi, and xAI credentials.",
-    "refresh_all_credentials": "Refresh all credentials",
-    "usage_window": "Usage windows"
+    "refresh_all_credentials": "Refresh all credentials"
   },
   "plugin_management": {
     "title": "Plugin Management",

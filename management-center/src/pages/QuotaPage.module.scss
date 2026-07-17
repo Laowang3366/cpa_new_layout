@@ -313,7 +313,7 @@
 
 .quotaBar {
   position: relative;
-  height: 8px;
+  height: 5px;
   background-color: var(--bg-tertiary);
   border-radius: 999px;
   overflow: hidden;
@@ -880,20 +880,6 @@
   .quotaWindowWeekly .quotaModel {
     background: color-mix(in srgb, #10b981 16%, transparent);
     color: #078a65;
-  }
-}
-
-.quotaUsageWindowTitle {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 8px;
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 600;
-
-  svg {
-    color: var(--text-tertiary);
   }
 }
 
