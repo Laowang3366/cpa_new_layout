@@ -10,10 +10,7 @@
 }
 
 .pageHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: $spacing-lg;
+  display: block;
 }
 
 .pageTitle {
@@ -34,8 +31,22 @@
   align-items: center;
   gap: $spacing-sm;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
   min-width: 0;
+  margin-top: 12px;
+
+  :global(.btn > span) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    line-height: 1;
+  }
+
+  :global(.btn svg) {
+    display: block;
+    flex: 0 0 auto;
+  }
 }
 
 .errorBox {

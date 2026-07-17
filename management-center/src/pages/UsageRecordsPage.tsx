@@ -701,16 +701,16 @@ export function UsageRecordsPage() {
           <p className={styles.description}>
             {t('usage_records.description', { defaultValue: '查看网关请求、Token、费用和调用趋势。' })}
           </p>
-        </div>
-        <div className={styles.headerActions}>
-          <Button variant="secondary" size="sm" onClick={openPricing}>
-            <IconDollarSign size={15} />
-            {t('usage_records.pricing_button', { defaultValue: '费用规则' })}
-          </Button>
-          <Button variant="secondary" size="sm" onClick={() => void loadData()} loading={loading}>
-            <IconRefreshCw size={15} />
-            {t('common.refresh')}
-          </Button>
+          <div className={styles.headerActions}>
+            <Button variant="secondary" size="sm" onClick={openPricing}>
+              <IconDollarSign size={15} />
+              {t('usage_records.pricing_button', { defaultValue: '费用规则' })}
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => void loadData()} loading={loading}>
+              <IconRefreshCw size={15} />
+              {t('common.refresh')}
+            </Button>
+          </div>
         </div>
       </div>
 
