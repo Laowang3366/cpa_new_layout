@@ -313,7 +313,7 @@
 
 .quotaBar {
   position: relative;
-  height: 18px;
+  height: 8px;
   background-color: var(--bg-tertiary);
   border-radius: 999px;
   overflow: hidden;
@@ -332,7 +332,7 @@
   align-items: center;
   justify-content: center;
   color: var(--text-primary);
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 700;
   line-height: 1;
   pointer-events: none;
@@ -817,7 +817,31 @@
   }
 
   .quotaBar {
-    width: min(100%, 320px);
+    grid-column: 2;
+    width: 100%;
+  }
+
+  .quotaRow {
+    display: grid;
+    grid-template-columns: minmax(54px, auto) minmax(160px, 320px) auto;
+    align-items: center;
+    justify-content: start;
+    column-gap: 10px;
+    row-gap: 6px;
+  }
+
+  .quotaRowHeader {
+    display: contents;
+  }
+
+  .quotaModel {
+    grid-column: 1;
+  }
+
+  .quotaMeta {
+    grid-column: 3;
+    gap: 0;
+    justify-self: start;
   }
 }
 
