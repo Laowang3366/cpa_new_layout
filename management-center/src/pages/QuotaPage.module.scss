@@ -312,7 +312,8 @@
 }
 
 .quotaBar {
-  height: 8px;
+  position: relative;
+  height: 18px;
   background-color: var(--bg-tertiary);
   border-radius: 999px;
   overflow: hidden;
@@ -322,6 +323,20 @@
   height: 100%;
   background-color: var(--success-color, #22c55e);
   transition: width 0.2s ease;
+}
+
+.quotaBarPercent {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  text-shadow: 0 1px 2px var(--bg-primary);
 }
 
 .quotaBarFillHigh {
@@ -350,8 +365,7 @@
 }
 
 .quotaPercent {
-  font-weight: 600;
-  color: var(--text-primary);
+  display: none;
 }
 
 .quotaReset {

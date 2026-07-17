@@ -48,6 +48,9 @@ export function QuotaProgressBar({
         className={`${styles.quotaBarFill} ${fillClass}`}
         style={{ width: `${widthPercent}%` }}
       />
+      <span className={styles.quotaBarPercent}>
+        {normalized === null ? '--' : `${Math.round(normalized)}%`}
+      </span>
     </div>
   );
 }
