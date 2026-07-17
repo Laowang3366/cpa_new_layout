@@ -90,6 +90,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
   const { t } = useTranslation();
 
   const displayType = item.type || item.provider || defaultType;
+  const normalizedDisplayType = displayType.toLowerCase();
   const typeColorSet = TYPE_COLORS[displayType] || TYPE_COLORS.unknown;
   const typeColor: ThemeColors =
     resolvedTheme === 'dark' && typeColorSet.dark ? typeColorSet.dark : typeColorSet.light;
@@ -181,7 +182,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
   const planType = subscriptionState.planType?.trim() ?? '';
   const normalizedPlanType = planType.toLowerCase().replace(/[_-]/g, '');
   const planKey =
-    displayType === 'claude' && planType
+    normalizedDisplayType === 'claude' && planType
       ? `claude_quota.${planType}`
       : normalizedPlanType === 'plus'
         ? 'codex_quota.plan_plus'
@@ -226,7 +227,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
         <td className={styles.quotaTableNameCell} title={item.name}>{item.name}</td>
         <td>{typeBadge}</td>
         <td>{subscriptionContent}</td>
-        <td className={`${styles.quotaTableValueCell} ${displayType === 'codex' ? styles.quotaTableValueCellCompact : ''}`}>
+        <td className={`${styles.quotaTableValueCell} ${normalizedDisplayType === 'codex' ? styles.quotaTableValueCellCompact : ''} ${normalizedDisplayType === 'xai' ? styles.quotaTableValueCellXai : ''}`}>
           {quotaContent}
         </td>
         <td className={styles.quotaTableActionsCell}>{actions}</td>
