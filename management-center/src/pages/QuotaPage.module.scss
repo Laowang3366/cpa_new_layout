@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-lg;
-  width: min(100%, 1500px);
+  width: min(100%, 1120px);
   margin-inline: auto;
 }
 
@@ -750,7 +750,7 @@
 }
 
 .quotaTableWrap {
-  width: min(100%, 1120px);
+  width: min(100%, 990px);
   overflow-x: auto;
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -758,8 +758,8 @@
 }
 
 .quotaTable {
-  width: 100%;
-  min-width: 1100px;
+  width: 990px;
+  min-width: 990px;
   border-collapse: collapse;
   table-layout: fixed;
   color: var(--text-primary);
@@ -791,11 +791,11 @@
     background: color-mix(in srgb, var(--bg-hover) 66%, transparent);
   }
 
-  th:nth-child(1) { width: 260px; }
-  th:nth-child(2) { width: 110px; }
-  th:nth-child(3) { width: 230px; }
-  th:nth-child(4) { width: 360px; }
-  th:nth-child(5) { width: 150px; }
+  th:nth-child(1) { width: 250px; }
+  th:nth-child(2) { width: 100px; }
+  th:nth-child(3) { width: 220px; }
+  th:nth-child(4) { width: 290px; }
+  th:nth-child(5) { width: 130px; }
 }
 
 .quotaTableNameCell {
