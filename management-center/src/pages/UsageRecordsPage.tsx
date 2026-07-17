@@ -90,9 +90,6 @@ const formatTokens = (value: number) => {
   return formatInteger(amount);
 };
 
-const formatCost = (value: number, currency: string) =>
-  `${currency || 'USD'} ${Math.max(0, value || 0).toFixed(4)}`;
-
 const formatSummaryCost = (value: number, currency: string) => {
   const amount = Math.max(0, value || 0).toFixed(4);
   return (currency || 'USD').toUpperCase() === 'USD' ? `$${amount}` : `${currency} ${amount}`;
@@ -131,6 +128,63 @@ function StatCard({
         <strong className={styles.statValue}>{value}</strong>
         {detail && <div className={styles.statDetail}>{detail}</div>}
       </div>
+    </div>
+  );
+}
+
+function HeaderFilter({
+  label,
+  value,
+  options,
+  defaultValue,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: ReadonlyArray<{ value: string; label: string }>;
+  defaultValue: string;
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    return () => document.removeEventListener('mousedown', closeOnOutsideClick);
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className={styles.headerFilter}>
+      <button
+        type="button"
+        className={`${styles.headerFilterTrigger} ${value !== defaultValue ? styles.headerFilterActive : ''}`}
+        onClick={() => setOpen((current) => !current)}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+      >
+        <span>{label}</span>
+        <IconChevronDown size={12} />
+      </button>
+      {open && (
+        <div className={styles.headerFilterMenu} role="listbox" aria-label={label}>
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className={value === option.value ? styles.headerFilterOptionActive : ''}
+              onClick={() => { onChange(option.value); setOpen(false); }}
+              role="option"
+              aria-selected={value === option.value}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -729,14 +783,9 @@ export function UsageRecordsPage() {
                   <tr>
                     <SortableHeader label={t('usage_records.time', { defaultValue: '时间' })} field="timestamp" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
                     <SortableHeader label={t('usage_records.model', { defaultValue: '模型' })} field="model" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
-                    <SortableHeader
-                      label={t('usage_records.provider', { defaultValue: 'Provider' })}
-                      field="provider"
-                      activeField={draftFilters.sort_by ?? 'timestamp'}
-                      direction={draftFilters.sort_order ?? 'desc'}
-                      onSort={handleSort}
-                      extra={<Select size="sm" className={styles.tableHeaderSelect} value={draftFilters.provider ?? ''} options={providerOptions} onChange={(value) => updateDraft({ provider: value })} ariaLabel="Provider" />}
-                    />
+                    <th>
+                      <HeaderFilter label={t('usage_records.provider', { defaultValue: 'Provider' })} value={draftFilters.provider ?? ''} defaultValue="" options={providerOptions} onChange={(value) => updateDraft({ provider: value })} />
+                    </th>
                     <th>{t('usage_records.account', { defaultValue: '账号' })}</th>
                     <th>{t('usage_records.endpoint', { defaultValue: '端点' })}</th>
                     <th>{t('usage_records.reasoning_effort', { defaultValue: '思考等级' })}</th>
@@ -745,10 +794,7 @@ export function UsageRecordsPage() {
                     <SortableHeader label={t('usage_records.cost', { defaultValue: '费用' })} field="cost" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
                     <SortableHeader label={t('usage_records.latency', { defaultValue: '耗时' })} field="latency" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
                     <th>
-                      <div className={styles.tableHeaderFilter}>
-                        <span>{t('usage_records.status', { defaultValue: '状态' })}</span>
-                        <Select size="sm" className={styles.tableHeaderSelect} value={draftFilters.status ?? 'all'} options={statusOptions} onChange={(value) => updateDraft({ status: value as UsageStatusFilter })} ariaLabel={t('usage_records.status', { defaultValue: '状态' })} />
-                      </div>
+                      <HeaderFilter label={t('usage_records.status', { defaultValue: '状态' })} value={draftFilters.status ?? 'all'} defaultValue="all" options={statusOptions} onChange={(value) => updateDraft({ status: value as UsageStatusFilter })} />
                     </th>
                   </tr>
                 </thead>
@@ -770,7 +816,7 @@ export function UsageRecordsPage() {
                       <td className={styles.cacheHitRate}>
                         {formatCacheHitRate(item.tokens.cached_tokens, item.tokens.input_tokens)}
                       </td>
-                      <td className={item.cost_known ? styles.costValue : styles.mutedText}>{item.cost_known ? formatCost(item.cost, pricing.currency) : '--'}</td>
+                      <td className={item.cost_known ? styles.costValue : styles.mutedText}>{item.cost_known ? formatSummaryCost(item.cost, pricing.currency) : '--'}</td>
                       <td>
                         <LatencyDetails firstTokenMs={item.first_token_ms} totalMs={item.latency_ms} />
                       </td>
