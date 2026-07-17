@@ -182,10 +182,10 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
     if (!wasLoading) return;
 
     pendingQuotaRefreshRef.current = false;
-    const targets = effectiveViewMode === 'all' ? filteredFiles : pageItems;
+    const targets = filteredFiles;
     if (targets.length === 0) return;
     loadQuota(targets, setLoading);
-  }, [loading, effectiveViewMode, filteredFiles, pageItems, loadQuota, setLoading]);
+  }, [loading, filteredFiles, loadQuota, setLoading]);
 
   useEffect(() => {
     if (loading) return;

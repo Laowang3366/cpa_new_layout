@@ -25,6 +25,8 @@ interface LoadQuotaResult<TData> {
   errorStatus?: number;
 }
 
+const MAX_CONCURRENT_QUOTA_REQUESTS = 8;
+
 export function useQuotaLoader<TState, TData>(config: QuotaConfig<TState, TData>) {
   const { t } = useTranslation();
   const quota = useQuotaStore(config.storeSelector);
@@ -54,15 +56,28 @@ export function useQuotaLoader<TState, TData>(config: QuotaConfig<TState, TData>
           return nextState;
         });
 
-        const results = await Promise.all(
-          targets.map(async (file): Promise<LoadQuotaResult<TData>> => {
-            try {
-              const data = await config.fetchQuota(file, t);
-              return { name: file.name, status: 'success', data };
-            } catch (err: unknown) {
-              const message = err instanceof Error ? err.message : t('common.unknown_error');
-              const errorStatus = getStatusFromError(err);
-              return { name: file.name, status: 'error', error: message, errorStatus };
+        const results: LoadQuotaResult<TData>[] = new Array(targets.length);
+        let nextTargetIndex = 0;
+        const workerCount = Math.min(MAX_CONCURRENT_QUOTA_REQUESTS, targets.length);
+
+        await Promise.all(
+          Array.from({ length: workerCount }, async () => {
+            while (nextTargetIndex < targets.length) {
+              const targetIndex = nextTargetIndex;
+              nextTargetIndex += 1;
+              const file = targets[targetIndex];
+
+              let result: LoadQuotaResult<TData>;
+              try {
+                const data = await config.fetchQuota(file, t);
+                result = { name: file.name, status: 'success', data };
+              } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : t('common.unknown_error');
+                const errorStatus = getStatusFromError(err);
+                result = { name: file.name, status: 'error', error: message, errorStatus };
+              }
+
+              results[targetIndex] = result;
             }
           })
         );
