@@ -5,6 +5,8 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-lg;
+  width: min(100%, 1500px);
+  margin-inline: auto;
 }
 
 .pageHeader {
@@ -748,7 +750,7 @@
 }
 
 .quotaTableWrap {
-  width: 100%;
+  width: min(100%, 1120px);
   overflow-x: auto;
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -757,7 +759,7 @@
 
 .quotaTable {
   width: 100%;
-  min-width: 1080px;
+  min-width: 1100px;
   border-collapse: collapse;
   table-layout: fixed;
   color: var(--text-primary);
@@ -792,8 +794,8 @@
   th:nth-child(1) { width: 260px; }
   th:nth-child(2) { width: 110px; }
   th:nth-child(3) { width: 230px; }
-  th:nth-child(4) { width: auto; }
-  th:nth-child(5) { width: 190px; }
+  th:nth-child(4) { width: 360px; }
+  th:nth-child(5) { width: 150px; }
 }
 
 .quotaTableNameCell {
@@ -904,7 +906,7 @@
 
 .quotaTableActionsCell {
   .quotaCardActions {
-    justify-content: flex-end;
+    justify-content: flex-start;
     padding: 0;
   }
 }
