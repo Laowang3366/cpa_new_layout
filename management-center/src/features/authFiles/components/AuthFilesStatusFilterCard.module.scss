@@ -1,8 +1,9 @@
 .card {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(3, 42px);
   align-items: center;
-  gap: 16px;
+  row-gap: 2px;
   width: 100%;
   min-width: 0;
   padding: 12px;
@@ -15,7 +16,8 @@
 .filterGroup {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 16px;
   min-width: 0;
 }
 
@@ -30,7 +32,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(72px, 1fr));
   gap: 6px;
-  width: min(100%, 410px);
+  width: min(72%, 410px);
   padding: 3px;
   border: 1px solid var(--border-color);
   border-radius: 7px;
@@ -41,14 +43,15 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex: 0 0 auto;
-  margin-left: auto;
+  width: 100%;
+  margin-left: 0;
 }
 
 .center {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  width: 100%;
   min-width: 0;
 }
 

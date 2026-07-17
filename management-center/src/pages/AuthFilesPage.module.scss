@@ -103,7 +103,9 @@
 
 .filterRail {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
   padding: 12px 14px;
   border-radius: 10px;
@@ -111,6 +113,8 @@
   background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
 
   @include mobile {
+    align-items: stretch;
+    flex-direction: column;
     padding: 10px;
   }
 }
@@ -144,7 +148,28 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  min-width: 0;
+  flex: 1 1 auto;
   gap: 8px;
+}
+
+.filterRailSearch {
+  width: min(320px, 30vw);
+  flex: 0 0 min(320px, 30vw);
+
+  :global(.form-group) {
+    margin: 0;
+  }
+
+  :global(.input) {
+    height: 38px;
+    font-size: 12px;
+  }
+
+  @include mobile {
+    width: 100%;
+    flex-basis: auto;
+  }
 }
 
 .filterTag {
@@ -261,9 +286,7 @@
 .filterControls {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
-  grid-template-areas:
-    'search options'
-    'status options';
+  grid-template-areas: 'status options';
   gap: 12px;
   align-items: stretch;
 
@@ -280,7 +303,6 @@
   @media (max-width: 1100px) {
     grid-template-columns: 1fr;
     grid-template-areas:
-      'search'
       'status'
       'options';
   }
@@ -288,7 +310,6 @@
   @include mobile {
     grid-template-columns: 1fr;
     grid-template-areas:
-      'search'
       'status'
       'options';
   }
@@ -313,7 +334,7 @@
   grid-area: status;
   min-width: 0;
   width: 100%;
-  align-self: end;
+  align-self: stretch;
 }
 
 .filterOptionsCard {
@@ -393,19 +414,6 @@
   }
 }
 
-.filterSearchItem {
-  grid-area: search;
-  display: flex;
-  align-items: stretch;
-  min-width: 0;
-  width: 100%;
-
-  :global(.form-group) {
-    width: 100%;
-    margin: 0;
-  }
-}
-
 .filterOptionsRow {
   display: flex;
   align-items: center;
@@ -435,8 +443,10 @@
 .displayModeControl {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   min-width: 0;
+  width: 100%;
 
   > span {
     color: var(--text-tertiary);
@@ -493,9 +503,10 @@
 .sortModeControl {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 10px;
   min-width: 0;
+  width: 100%;
 
   > span {
     color: var(--text-tertiary);

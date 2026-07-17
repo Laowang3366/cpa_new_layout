@@ -823,6 +823,18 @@ export function AuthFilesPage() {
           );
         })}
       </div>
+      <div className={styles.filterRailSearch}>
+        <Input
+          className={styles.searchInput}
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          placeholder={t('auth_files.search_placeholder')}
+          rightElement={<IconSearch className={styles.searchIcon} size={17} />}
+        />
+      </div>
     </div>
   );
 
@@ -918,18 +930,6 @@ export function AuthFilesPage() {
           <div className={styles.filterContent}>
             <div className={styles.filterControlsPanel}>
               <div className={styles.filterControls}>
-                <div className={styles.filterSearchItem}>
-                  <Input
-                    className={styles.searchInput}
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      setPage(1);
-                    }}
-                    placeholder={t('auth_files.search_placeholder')}
-                    rightElement={<IconSearch className={styles.searchIcon} size={17} />}
-                  />
-                </div>
                 <div className={styles.filterOptionsCard}>
                   <div className={styles.filterOptionsRow}>
                     <span className={styles.filterSettingLabel}>{t('auth_files.page_size_label')}</span>
