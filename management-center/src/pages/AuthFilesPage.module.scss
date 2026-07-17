@@ -322,8 +322,8 @@
   z-index: 31;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  row-gap: 0;
+  grid-template-rows: repeat(3, 42px);
+  row-gap: 2px;
   align-content: stretch;
   min-width: 0;
   padding: 12px;
@@ -334,8 +334,8 @@
 
   > .filterOptionsRow,
   > .columnVisibilityDropdown {
-    height: auto;
-    min-height: 0;
+    height: 42px;
+    min-height: 42px;
     border-top: 0 !important;
     box-sizing: border-box;
   }
@@ -343,10 +343,6 @@
   > .filterOptionsRow + .filterOptionsRow {
     margin-top: 0 !important;
     padding-top: 0 !important;
-  }
-
-  > .filterOptionsRow:nth-child(2) {
-    transform: translateY(2px);
   }
 
   .filterOptionsRow {
@@ -648,9 +644,8 @@
 
 .columnVisibilityDropdown {
   position: relative;
-  transform: translateY(8px);
   width: 100%;
-  min-height: 0;
+  min-height: 42px;
   border-top: 0;
   padding-top: 0;
 
