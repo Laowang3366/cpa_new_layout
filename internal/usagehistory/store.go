@@ -95,6 +95,7 @@ type ListResult struct {
 
 type Breakdown struct {
 	Key          string  `json:"key"`
+	Group        string  `json:"group"`
 	Requests     int64   `json:"requests"`
 	Failures     int64   `json:"failures"`
 	Tokens       int64   `json:"tokens"`
@@ -284,14 +285,14 @@ func (s *Store) Stats(filter Filter) Stats {
 		}
 		latencyTotal += record.LatencyMs
 
-		addBreakdown(models, record.Model, record)
+		addGroupedBreakdown(models, record.Provider, record.Model, record)
 		addBreakdown(providers, record.Provider, record)
 		addBreakdown(endpoints, record.Endpoint, record)
 		account := record.Source
 		if strings.TrimSpace(account) == "" {
 			account = record.AuthIndex
 		}
-		addBreakdown(accounts, account, record)
+		addGroupedBreakdown(accounts, record.Provider, account, record)
 
 		bucket := trendBucket(record.Timestamp, filter.Granularity)
 		point := trend[bucket]
@@ -779,6 +780,28 @@ func addBreakdown(target map[string]*Breakdown, key string, record Record) {
 		item = &Breakdown{Key: key, CostKnown: true}
 		target[key] = item
 	}
+	addBreakdownValues(item, record)
+}
+
+func addGroupedBreakdown(target map[string]*Breakdown, group, key string, record Record) {
+	group = strings.TrimSpace(group)
+	if group == "" {
+		group = "unknown"
+	}
+	key = strings.TrimSpace(key)
+	if key == "" {
+		key = "unknown"
+	}
+	compositeKey := group + "\x00" + key
+	item := target[compositeKey]
+	if item == nil {
+		item = &Breakdown{Key: key, Group: group, CostKnown: true}
+		target[compositeKey] = item
+	}
+	addBreakdownValues(item, record)
+}
+
+func addBreakdownValues(item *Breakdown, record Record) {
 	item.Requests++
 	if record.Failed {
 		item.Failures++

@@ -39,6 +39,7 @@ export interface UsageRecord {
 
 export interface UsageBreakdown {
   key: string;
+  group: string;
   requests: number;
   failures: number;
   tokens: number;

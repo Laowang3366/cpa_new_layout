@@ -209,12 +209,14 @@
 
 .breakdownCard {
   min-width: 0;
-  min-height: 330px;
+  height: 360px;
+  min-height: 360px;
 }
 
 .breakdownTableWrap {
   width: 100%;
-  overflow-x: auto;
+  max-height: 286px;
+  overflow: auto;
 }
 
 .breakdownTable {
@@ -227,8 +229,12 @@
 }
 
 .breakdownTable th {
+  position: sticky;
+  z-index: 2;
+  top: 0;
   padding: 0 10px 10px;
   border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 700;
@@ -253,6 +259,7 @@
 
 .breakdownName {
   max-width: 190px;
+  padding-left: 34px !important;
   overflow: hidden;
   font-weight: 650;
   text-overflow: ellipsis;
@@ -277,81 +284,59 @@
   font-weight: 700;
 }
 
-.breakdownList {
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
+.breakdownGroupRow {
+  background: color-mix(in srgb, var(--bg-secondary) 68%, var(--bg-primary));
 }
 
-.breakdownRow {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
+.breakdownGroupRow td {
+  font-weight: 650;
 }
 
-.breakdownHeading,
-.breakdownValues {
-  display: flex;
+.breakdownGroupButton {
+  display: grid;
+  grid-template-columns: 16px minmax(0, auto) max-content;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-width: 0;
+  gap: 7px;
+  max-width: 190px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
 }
 
-.breakdownKey {
-  min-width: 0;
+.breakdownGroupButton svg {
+  transition: transform $transition-fast;
+  transform: rotate(-90deg);
+}
+
+.breakdownGroupButton[aria-expanded='true'] svg {
+  transform: rotate(0deg);
+}
+
+.breakdownGroupButton span {
   overflow: hidden;
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.breakdownMeta,
-.breakdownValues {
-  color: var(--text-tertiary);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
+.breakdownGroupButton small {
+  display: inline-flex;
+  min-width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary-color) 11%, var(--bg-primary));
+  color: var(--primary-color);
+  font-size: 10px;
 }
 
-.breakdownValues span:last-child {
-  color: var(--text-secondary);
-  font-weight: 600;
-}
-
-.breakdownBarTrack,
-.trendTrack {
-  width: 100%;
-  height: 7px;
-  overflow: hidden;
-  border-radius: $radius-full;
-  background: var(--bg-secondary);
-}
-
-.breakdownBar {
-  display: block;
-  height: 100%;
-  min-width: 2px;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--primary-color), color-mix(in srgb, var(--primary-color) 48%, #10b981));
-  transition: width $transition-normal;
-}
-
-.cacheRateBar {
-  display: block;
-  height: 100%;
-  min-width: 2px;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #0ea5e9, #10b981);
-  transition: width $transition-normal;
-}
-
-.cacheRateValue {
-  color: #138a55;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
+.breakdownChildRow {
+  background: var(--bg-primary);
 }
 
 .noData,
@@ -362,54 +347,6 @@
   text-align: center;
 }
 
-.trendCard {
-  min-width: 0;
-  min-height: 330px;
-}
-
-.lineChartWrap {
-  width: 100%;
-  min-height: 250px;
-  overflow-x: auto;
-}
-
-.lineChart {
-  display: block;
-  width: 100%;
-  min-width: 520px;
-  height: 250px;
-}
-
-.chartGridLine {
-  stroke: var(--border-color);
-  stroke-width: 1;
-}
-
-.chartAxisText {
-  fill: var(--text-tertiary);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-
-.chartAreaLine {
-  fill: none;
-  stroke: var(--primary-color);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 3;
-}
-
-.chartPoint circle {
-  fill: var(--bg-primary);
-  stroke: var(--primary-color);
-  stroke-width: 3;
-  transition: fill $transition-fast, r $transition-fast;
-}
-
-.chartPoint:hover circle {
-  fill: var(--primary-color);
-  r: 6px;
-}
 
 .detailsCard {
   min-width: 0;

@@ -10,6 +10,7 @@ import { Select } from '@/components/ui/Select';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import {
   IconChevronLeft,
+  IconChevronDown,
   IconDollarSign,
   IconPlus,
   IconRefreshCw,
@@ -29,7 +30,6 @@ import {
   type UsageRecordFilters,
   type UsageStats,
   type UsageStatusFilter,
-  type UsageTrendPoint,
 } from '@/services/api/usageRecords';
 import { formatDateTimeValue } from '@/utils/format';
 import { getErrorMessage } from '@/utils/helpers';
@@ -287,6 +287,64 @@ function BreakdownCard({
   firstColumnLabel: string;
 }) {
   const { t } = useTranslation();
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set());
+  const groups = useMemo(() => {
+    const grouped = new Map<string, UsageBreakdown[]>();
+    items.forEach((item) => {
+      const group = item.group || 'unknown';
+      grouped.set(group, [...(grouped.get(group) ?? []), item]);
+    });
+    return [...grouped.entries()].map(([name, children]) => ({
+      name,
+      children,
+      totals: children.reduce<UsageBreakdown>((total, item) => ({
+        key: name,
+        group: name,
+        requests: total.requests + item.requests,
+        failures: total.failures + item.failures,
+        tokens: total.tokens + item.tokens,
+        input_tokens: total.input_tokens + item.input_tokens,
+        output_tokens: total.output_tokens + item.output_tokens,
+        cached_tokens: total.cached_tokens + item.cached_tokens,
+        cost: total.cost + item.cost,
+        cost_known: total.cost_known && item.cost_known,
+      }), {
+        key: name,
+        group: name,
+        requests: 0,
+        failures: 0,
+        tokens: 0,
+        input_tokens: 0,
+        output_tokens: 0,
+        cached_tokens: 0,
+        cost: 0,
+        cost_known: true,
+      }),
+    })).sort((a, b) => b.totals.tokens - a.totals.tokens);
+  }, [items]);
+
+  const renderValues = (item: UsageBreakdown) => (
+    <>
+      <td>{formatInteger(item.requests)}</td>
+      <td className={styles.breakdownTokens}>
+        <span>{t('usage_records.input_tokens_short', { defaultValue: '输入' })} {formatTokens(item.input_tokens)}</span>
+        <span>{t('usage_records.output_tokens_short', { defaultValue: '输出' })} {formatTokens(item.output_tokens)}</span>
+        <span>{t('usage_records.cache_tokens_short', { defaultValue: '缓存' })} {formatTokens(item.cached_tokens)}</span>
+      </td>
+      <td className={styles.breakdownHitRate}>{formatCacheHitRate(item.cached_tokens, item.input_tokens)}</td>
+      <td className={styles.breakdownCost}>{item.cost_known ? formatSummaryCost(item.cost, tokenCurrency) : '--'}</td>
+    </>
+  );
+
+  const toggleGroup = (name: string) => {
+    setExpandedGroups((current) => {
+      const next = new Set(current);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  };
+
   return (
     <Card title={title} className={styles.breakdownCard}>
       {items.length === 0 ? (
@@ -304,108 +362,30 @@ function BreakdownCard({
               </tr>
             </thead>
             <tbody>
-              {items.slice(0, 8).map((item) => (
-                <tr key={item.key}>
-                  <td className={styles.breakdownName} title={item.key}>{item.key || 'unknown'}</td>
-                  <td>{formatInteger(item.requests)}</td>
-                  <td className={styles.breakdownTokens}>
-                    <span>{t('usage_records.input_tokens_short', { defaultValue: '输入' })} {formatTokens(item.input_tokens)}</span>
-                    <span>{t('usage_records.output_tokens_short', { defaultValue: '输出' })} {formatTokens(item.output_tokens)}</span>
-                    <span>{t('usage_records.cache_tokens_short', { defaultValue: '缓存' })} {formatTokens(item.cached_tokens)}</span>
-                  </td>
-                  <td className={styles.breakdownHitRate}>{formatCacheHitRate(item.cached_tokens, item.input_tokens)}</td>
-                  <td className={styles.breakdownCost}>{item.cost_known ? formatSummaryCost(item.cost, tokenCurrency) : '--'}</td>
-                </tr>
-              ))}
+              {groups.flatMap(({ name, children, totals }) => {
+                const expanded = expandedGroups.has(name);
+                const groupRow = (
+                  <tr key={`group:${name}`} className={styles.breakdownGroupRow}>
+                    <td>
+                      <button type="button" className={styles.breakdownGroupButton} onClick={() => toggleGroup(name)} aria-expanded={expanded}>
+                        <IconChevronDown size={15} />
+                        <span title={name}>{name}</span>
+                        <small>{children.length}</small>
+                      </button>
+                    </td>
+                    {renderValues(totals)}
+                  </tr>
+                );
+                if (!expanded) return [groupRow];
+                return [groupRow, ...children.map((item) => (
+                  <tr key={`${name}:${item.key}`} className={styles.breakdownChildRow}>
+                    <td className={styles.breakdownName} title={item.key}>{item.key || 'unknown'}</td>
+                    {renderValues(item)}
+                  </tr>
+                ))];
+              })}
             </tbody>
           </table>
-        </div>
-      )}
-    </Card>
-  );
-}
-
-function ModelCacheCard({ title, items }: { title: string; items: UsageBreakdown[] }) {
-  const ranked = [...items]
-    .filter((item) => item.input_tokens > 0)
-    .sort((a, b) => (b.cached_tokens / b.input_tokens) - (a.cached_tokens / a.input_tokens))
-    .slice(0, 8);
-
-  return (
-    <Card title={title} className={styles.breakdownCard}>
-      {ranked.length === 0 ? (
-        <div className={styles.noData}>--</div>
-      ) : (
-        <div className={styles.breakdownList}>
-          {ranked.map((item) => {
-            const hitRate = Math.min(100, (item.cached_tokens / item.input_tokens) * 100);
-            return (
-              <div className={styles.breakdownRow} key={item.key}>
-                <div className={styles.breakdownHeading}>
-                  <span className={styles.breakdownKey} title={item.key}>{item.key || 'unknown'}</span>
-                  <strong className={styles.cacheRateValue}>{hitRate.toFixed(1)}%</strong>
-                </div>
-                <div className={styles.breakdownBarTrack}>
-                  <span className={styles.cacheRateBar} style={{ width: `${Math.max(2, hitRate)}%` }} />
-                </div>
-                <div className={styles.breakdownValues}>
-                  <span>{formatTokens(item.cached_tokens)} cached</span>
-                  <span>{formatTokens(item.input_tokens)} input</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </Card>
-  );
-}
-
-function TrendChart({ title, points }: { title: string; points: UsageTrendPoint[] }) {
-  const width = 720;
-  const height = 250;
-  const padding = { top: 22, right: 20, bottom: 44, left: 54 };
-  const chartWidth = width - padding.left - padding.right;
-  const chartHeight = height - padding.top - padding.bottom;
-  const maxTokens = Math.max(1, ...points.map((point) => point.tokens));
-  const coordinates = points.map((point, index) => ({
-    point,
-    x: padding.left + (points.length === 1 ? chartWidth / 2 : (index / (points.length - 1)) * chartWidth),
-    y: padding.top + chartHeight - (point.tokens / maxTokens) * chartHeight,
-  }));
-  const line = coordinates.map(({ x, y }) => `${x},${y}`).join(' ');
-
-  return (
-    <Card title={title} className={styles.trendCard}>
-      {points.length === 0 ? (
-        <div className={styles.noData}>--</div>
-      ) : (
-        <div className={styles.lineChartWrap}>
-          <svg className={styles.lineChart} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={title}>
-            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-              const y = padding.top + chartHeight * ratio;
-              return (
-                <g key={ratio}>
-                  <line className={styles.chartGridLine} x1={padding.left} y1={y} x2={width - padding.right} y2={y} />
-                  <text className={styles.chartAxisText} x={padding.left - 9} y={y + 4} textAnchor="end">
-                    {formatTokens(maxTokens * (1 - ratio))}
-                  </text>
-                </g>
-              );
-            })}
-            <polyline className={styles.chartAreaLine} points={line} />
-            {coordinates.map(({ point, x, y }, index) => (
-              <g className={styles.chartPoint} key={point.timestamp}>
-                <circle cx={x} cy={y} r="4" />
-                <title>{`${formatDateTimeValue(point.timestamp)} · ${formatTokens(point.tokens)} Token · ${formatInteger(point.requests)} requests`}</title>
-                {(index === 0 || index === coordinates.length - 1 || index % Math.max(1, Math.ceil(coordinates.length / 5)) === 0) && (
-                  <text className={styles.chartAxisText} x={x} y={height - 15} textAnchor="middle">
-                    {new Date(point.timestamp).toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' })}
-                  </text>
-                )}
-              </g>
-            ))}
-          </svg>
         </div>
       )}
     </Card>
@@ -757,8 +737,6 @@ export function UsageRecordsPage() {
       <div className={styles.overviewGrid}>
         <BreakdownCard title={t('usage_records.models', { defaultValue: '模型分布' })} items={stats.models} tokenCurrency={pricing.currency} firstColumnLabel={t('usage_records.model', { defaultValue: '模型' })} />
         <BreakdownCard title={t('usage_records.accounts', { defaultValue: '账号分布' })} items={stats.accounts} tokenCurrency={pricing.currency} firstColumnLabel={t('usage_records.account', { defaultValue: '账号' })} />
-        <ModelCacheCard title={t('usage_records.model_cache_hits', { defaultValue: '模型缓存命中' })} items={stats.models} />
-        <TrendChart title={t('usage_records.trend', { defaultValue: 'Token 使用趋势' })} points={stats.trend} />
       </div>
 
       <Card title={t('usage_records.details', { defaultValue: '使用明细' })} className={styles.detailsCard}>

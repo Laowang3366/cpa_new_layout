@@ -78,6 +78,9 @@ func TestStorePersistsFiltersAndRecalculatesCost(t *testing.T) {
 	if stats.Models[1].Key != "gpt-5" || stats.Models[1].InputTokens != 1000 || stats.Models[1].OutputTokens != 500 || stats.Models[1].CachedTokens != 800 {
 		t.Fatalf("model token breakdown = %+v", stats.Models)
 	}
+	if stats.Models[1].Group != "openai" || stats.Accounts[1].Group != "openai" {
+		t.Fatalf("provider groups = models %+v accounts %+v", stats.Models, stats.Accounts)
+	}
 
 	reloaded := NewStore()
 	if err := reloaded.Configure(recordPath, pricingPath); err != nil {
