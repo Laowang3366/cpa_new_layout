@@ -2268,6 +2268,12 @@
   color: var(--failure-badge-text);
 }
 
+.statRate {
+  background: color-mix(in srgb, var(--primary-color) 9%, transparent);
+  color: var(--primary-color);
+  font-variant-numeric: tabular-nums;
+}
+
 .statusPanel {
   display: flex;
   flex-direction: column;

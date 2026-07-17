@@ -43,9 +43,10 @@ type StylesModule = Record<string, string>;
 interface ProviderStatusBarProps {
   statusData: StatusBarData;
   styles?: StylesModule;
+  showRate?: boolean;
 }
 
-export function ProviderStatusBar({ statusData, styles: stylesProp }: ProviderStatusBarProps) {
+export function ProviderStatusBar({ statusData, styles: stylesProp, showRate = true }: ProviderStatusBarProps) {
   const { t } = useTranslation();
   const s = (stylesProp || defaultStyles) as StylesModule;
   const [activeTooltip, setActiveTooltip] = useState<number | null>(null);
@@ -147,9 +148,11 @@ export function ProviderStatusBar({ statusData, styles: stylesProp }: ProviderSt
           );
         })}
       </div>
-      <span className={`${s.statusRate} ${rateClass}`}>
-        {hasData ? formatSuccessRate(statusData.successRate) : '--'}
-      </span>
+      {showRate && (
+        <span className={`${s.statusRate} ${rateClass}`}>
+          {hasData ? formatSuccessRate(statusData.successRate) : '--'}
+        </span>
+      )}
     </div>
   );
 }

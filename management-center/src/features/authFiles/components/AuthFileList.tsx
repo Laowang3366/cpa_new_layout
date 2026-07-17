@@ -339,11 +339,14 @@ export function AuthFileList({
                   <div className={styles.authFileRequestStats}>
                     <span className={styles.statSuccess}>{t('stats.success')} {normalizeUsageTotal(file.success)}</span>
                     <span className={styles.statFailure}>{t('stats.failure')} {normalizeUsageTotal(file.failed)}</span>
+                    <span className={styles.statRate}>
+                      {t('usage_records.success_rate')} {statusData.totalSuccess + statusData.totalFailure > 0 ? `${statusData.successRate.toFixed(1)}%` : '--'}
+                    </span>
                   </div>
                   {healthError ? (
                     <div className={styles.authFileHealthError} title={healthError}>{healthError}</div>
                   ) : (
-                    <ProviderStatusBar statusData={statusData} styles={styles} />
+                    <ProviderStatusBar statusData={statusData} styles={styles} showRate={false} />
                   )}
                 </td>}
                 {isColumnVisible('enabled') && <td>
