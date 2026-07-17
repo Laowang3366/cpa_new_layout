@@ -114,7 +114,7 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
   /* Removed useRef */
   const [columns, gridRef] = useGridColumns(380); // Min card width 380px matches SCSS
   const [viewMode, setViewMode] = useState<ViewMode>('paged');
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>('card');
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>('list');
   const [showTooManyWarning, setShowTooManyWarning] = useState(false);
   const [resettingQuotaName, setResettingQuotaName] = useState<string | null>(null);
 
@@ -296,17 +296,60 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
 
   const isRefreshing = sectionLoading || loading;
 
+  const renderQuotaCard = (item: AuthFileItem, listMode: boolean) => {
+    const itemQuota = quota[item.name];
+    const isResettingQuota = resettingQuotaName === item.name;
+    const canUseQuotaAction =
+      !disabled && !item.disabled && itemQuota?.status !== 'loading';
+    const showResetQuotaAction =
+      itemQuota !== undefined && Boolean(config.canResetQuota?.(itemQuota));
+    const resetQuotaAction =
+      config.resetQuota && showResetQuotaAction ? (
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className={styles.quotaResetCreditButton}
+          onClick={() => resetQuotaForFile(item)}
+          disabled={!canUseQuotaAction || isResettingQuota}
+          loading={isResettingQuota}
+          title={t('codex_quota.reset_button')}
+          aria-label={t('codex_quota.reset_button')}
+        >
+          {!isResettingQuota && <IconRefreshCw size={14} />}
+          {t('codex_quota.reset_button')}
+        </Button>
+      ) : undefined;
+
+    return (
+      <QuotaCard
+        key={item.name}
+        item={item}
+        quota={itemQuota}
+        resolvedTheme={resolvedTheme}
+        i18nPrefix={config.i18nPrefix}
+        cardClassName={config.cardClassName}
+        listMode={listMode}
+        defaultType={config.type}
+        canRefresh={canUseQuotaAction && !isResettingQuota}
+        onRefresh={() => void refreshQuotaForFile(item)}
+        resetQuotaAction={resetQuotaAction}
+        renderQuotaItems={config.renderQuotaItems}
+      />
+    );
+  };
+
   return (
     <Card
       title={titleNode}
       extra={
         <div className={styles.headerActions}>
           <div className={styles.viewModeToggle} role="group" aria-label={t('auth_files.display_style_label')}>
-            <Button variant="secondary" size="sm" className={`${styles.viewModeButton} ${layoutMode === 'card' ? styles.viewModeButtonActive : ''}`} onClick={() => setLayoutMode('card')}>
-              {t('auth_files.display_card')}
-            </Button>
             <Button variant="secondary" size="sm" className={`${styles.viewModeButton} ${layoutMode === 'list' ? styles.viewModeButtonActive : ''}`} onClick={() => setLayoutMode('list')}>
               {t('auth_files.display_list')}
+            </Button>
+            <Button variant="secondary" size="sm" className={`${styles.viewModeButton} ${layoutMode === 'card' ? styles.viewModeButtonActive : ''}`} onClick={() => setLayoutMode('card')}>
+              {t('auth_files.display_card')}
             </Button>
           </div>
           <div className={styles.viewModeToggle}>
@@ -360,50 +403,27 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
         />
       ) : (
         <>
-          <div ref={gridRef} className={`${config.gridClassName} ${layoutMode === 'list' ? styles.quotaList : ''}`}>
-            {pageItems.map((item) => {
-              const itemQuota = quota[item.name];
-              const isResettingQuota = resettingQuotaName === item.name;
-              const canUseQuotaAction =
-                !disabled && !item.disabled && itemQuota?.status !== 'loading';
-              const showResetQuotaAction =
-                itemQuota !== undefined && Boolean(config.canResetQuota?.(itemQuota));
-              const resetQuotaAction =
-                config.resetQuota && showResetQuotaAction ? (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className={styles.quotaResetCreditButton}
-                    onClick={() => resetQuotaForFile(item)}
-                    disabled={!canUseQuotaAction || isResettingQuota}
-                    loading={isResettingQuota}
-                    title={t('codex_quota.reset_button')}
-                    aria-label={t('codex_quota.reset_button')}
-                  >
-                    {!isResettingQuota && <IconRefreshCw size={14} />}
-                    {t('codex_quota.reset_button')}
-                  </Button>
-                ) : undefined;
-
-              return (
-                <QuotaCard
-                  key={item.name}
-                  item={item}
-                  quota={itemQuota}
-                  resolvedTheme={resolvedTheme}
-                  i18nPrefix={config.i18nPrefix}
-                  cardClassName={config.cardClassName}
-                  listMode={layoutMode === 'list'}
-                  defaultType={config.type}
-                  canRefresh={canUseQuotaAction && !isResettingQuota}
-                  onRefresh={() => void refreshQuotaForFile(item)}
-                  resetQuotaAction={resetQuotaAction}
-                  renderQuotaItems={config.renderQuotaItems}
-                />
-              );
-            })}
-          </div>
+          {layoutMode === 'list' ? (
+            <div ref={gridRef} className={styles.quotaTableWrap}>
+              <table className={styles.quotaTable}>
+                <thead>
+                  <tr>
+                    <th>{t('auth_files.list_name')}</th>
+                    <th>{t('auth_files.list_type')}</th>
+                    <th>{t('auth_files.remaining_quota')}</th>
+                    <th>{t('auth_files.list_actions')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pageItems.map((item) => renderQuotaCard(item, true))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div ref={gridRef} className={config.gridClassName}>
+              {pageItems.map((item) => renderQuotaCard(item, false))}
+            </div>
+          )}
           {filteredFiles.length > pageSize && effectiveViewMode === 'paged' && (
             <div className={styles.pagination}>
               <Button variant="secondary" size="sm" onClick={goToPrev} disabled={currentPage <= 1}>

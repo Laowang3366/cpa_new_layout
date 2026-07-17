@@ -108,71 +108,87 @@ export function QuotaCard<TState extends QuotaStatusState>({
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
-  return (
-    <div className={`${styles.fileCard} ${listMode ? styles.fileCardList : ''} ${cardClassName}`}>
-      <div className={styles.cardHeader}>
-        <span
-          className={styles.typeBadge}
-          style={{
-            backgroundColor: typeColor.bg,
-            color: typeColor.text,
-            ...(typeColor.border ? { border: typeColor.border } : {}),
-          }}
+  const typeBadge = (
+    <span
+      className={styles.typeBadge}
+      style={{
+        backgroundColor: typeColor.bg,
+        color: typeColor.text,
+        ...(typeColor.border ? { border: typeColor.border } : {}),
+      }}
+    >
+      {getTypeLabel(displayType)}
+    </span>
+  );
+
+  const quotaContent = quotaLoading ? (
+    <div className={styles.quotaMessage}>{t(`${i18nPrefix}.loading`)}</div>
+  ) : quotaStatus === 'idle' ? (
+    onRefresh ? (
+      <button
+        type="button"
+        className={`${styles.quotaMessage} ${styles.quotaMessageAction}`}
+        onClick={onRefresh}
+        disabled={!canRefresh}
+      >
+        {t(idleMessageKey)}
+      </button>
+    ) : (
+      <div className={styles.quotaMessage}>{t(idleMessageKey)}</div>
+    )
+  ) : quotaStatus === 'error' ? (
+    <div className={styles.quotaError}>
+      {t(`${i18nPrefix}.load_failed`, {
+        message: quotaErrorMessage,
+      })}
+    </div>
+  ) : quota ? (
+    renderQuotaItems(quota, t, { styles, QuotaProgressBar })
+  ) : (
+    <div className={styles.quotaMessage}>{t(idleMessageKey)}</div>
+  );
+
+  const actions = (resetQuotaAction || (onRefresh && quotaStatus !== 'idle')) && (
+    <div className={styles.quotaCardActions}>
+      {resetQuotaAction}
+      {onRefresh && quotaStatus !== 'idle' && (
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className={styles.quotaRefreshButton}
+          onClick={onRefresh}
+          disabled={!canRefresh || quotaLoading}
+          loading={quotaLoading}
+          title={t('auth_files.quota_refresh_hint')}
         >
-          {getTypeLabel(displayType)}
-        </span>
+          {!quotaLoading && <IconRefreshCw size={14} />}
+          {t('auth_files.quota_refresh_single')}
+        </Button>
+      )}
+    </div>
+  );
+
+  if (listMode) {
+    return (
+      <tr className={item.disabled ? styles.quotaTableRowDisabled : ''}>
+        <td className={styles.quotaTableNameCell} title={item.name}>{item.name}</td>
+        <td>{typeBadge}</td>
+        <td className={styles.quotaTableValueCell}>{quotaContent}</td>
+        <td className={styles.quotaTableActionsCell}>{actions}</td>
+      </tr>
+    );
+  }
+
+  return (
+    <div className={`${styles.fileCard} ${cardClassName}`}>
+      <div className={styles.cardHeader}>
+        {typeBadge}
         <span className={styles.fileName}>{item.name}</span>
       </div>
 
-      <div className={styles.quotaSection}>
-        {quotaLoading ? (
-          <div className={styles.quotaMessage}>{t(`${i18nPrefix}.loading`)}</div>
-        ) : quotaStatus === 'idle' ? (
-          onRefresh ? (
-            <button
-              type="button"
-              className={`${styles.quotaMessage} ${styles.quotaMessageAction}`}
-              onClick={onRefresh}
-              disabled={!canRefresh}
-            >
-              {t(idleMessageKey)}
-            </button>
-          ) : (
-            <div className={styles.quotaMessage}>{t(idleMessageKey)}</div>
-          )
-        ) : quotaStatus === 'error' ? (
-          <div className={styles.quotaError}>
-            {t(`${i18nPrefix}.load_failed`, {
-              message: quotaErrorMessage,
-            })}
-          </div>
-        ) : quota ? (
-          renderQuotaItems(quota, t, { styles, QuotaProgressBar })
-        ) : (
-          <div className={styles.quotaMessage}>{t(idleMessageKey)}</div>
-        )}
-      </div>
-
-      {(resetQuotaAction || (onRefresh && quotaStatus !== 'idle')) && (
-        <div className={styles.quotaCardActions}>
-          {resetQuotaAction}
-          {onRefresh && quotaStatus !== 'idle' && (
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              className={styles.quotaRefreshButton}
-              onClick={onRefresh}
-              disabled={!canRefresh || quotaLoading}
-              loading={quotaLoading}
-              title={t('auth_files.quota_refresh_hint')}
-            >
-              {!quotaLoading && <IconRefreshCw size={14} />}
-              {t('auth_files.quota_refresh_single')}
-            </Button>
-          )}
-        </div>
-      )}
+      <div className={styles.quotaSection}>{quotaContent}</div>
+      {actions}
     </div>
   );
 }
