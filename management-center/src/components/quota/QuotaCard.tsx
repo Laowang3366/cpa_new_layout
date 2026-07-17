@@ -173,7 +173,7 @@ export function QuotaCard<TState extends QuotaStatusState>({
     </div>
   );
 
-  const subscriptionState = quota as TState & {
+  const subscriptionState = (quota ?? {}) as Partial<TState> & {
     planType?: string | null;
     subscriptionActiveUntil?: string | number | null;
     rateLimitResetCreditsAvailableCount?: number | null;
