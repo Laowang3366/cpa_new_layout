@@ -503,6 +503,14 @@ export function UsageRecordsPage() {
     ],
     [stats.providers, t]
   );
+  const modelOptions = useMemo(() => {
+    const models = [...new Set(stats.models.map((item) => item.key.trim()).filter(Boolean))]
+      .sort((left, right) => left.localeCompare(right));
+    return [
+      { value: '', label: t('usage_records.all_models', { defaultValue: '全部模型' }) },
+      ...models.map((model) => ({ value: model, label: model })),
+    ];
+  }, [stats.models, t]);
 
   const statusOptions = [
     { value: 'all', label: t('usage_records.status_all', { defaultValue: '全部状态' }) },
@@ -532,7 +540,13 @@ export function UsageRecordsPage() {
   };
 
   const resetFilters = () => {
-    const next = { start: range.start, end: range.end, status: 'all' as UsageStatusFilter };
+    const next = {
+      start: range.start,
+      end: range.end,
+      model: '',
+      endpoint: '',
+      status: 'all' as UsageStatusFilter,
+    };
     setDraftFilters(next);
     setFilters(next);
     setPage(1);
@@ -682,18 +696,10 @@ export function UsageRecordsPage() {
             value={draftFilters.search ?? ''}
             onChange={(event) => updateDraft({ search: event.target.value })}
           />
-          <Input
-            label={t('usage_records.model', { defaultValue: '模型' })}
-            placeholder={t('usage_records.model_placeholder', { defaultValue: '按模型筛选' })}
-            value={draftFilters.model ?? ''}
-            onChange={(event) => updateDraft({ model: event.target.value })}
-          />
-          <Input
-            label={t('usage_records.endpoint', { defaultValue: '端点' })}
-            placeholder={t('usage_records.endpoint_placeholder', { defaultValue: '按端点筛选' })}
-            value={draftFilters.endpoint ?? ''}
-            onChange={(event) => updateDraft({ endpoint: event.target.value })}
-          />
+          <div className={styles.filterField}>
+            <label>{t('usage_records.model', { defaultValue: '模型' })}</label>
+            <Select value={draftFilters.model ?? ''} options={modelOptions} onChange={(value) => updateDraft({ model: value })} ariaLabel={t('usage_records.model', { defaultValue: '模型' })} />
+          </div>
           <div className={styles.filterField}>
             <label>{t('usage_records.provider', { defaultValue: 'Provider' })}</label>
             <Select value={draftFilters.provider ?? ''} options={providerOptions} onChange={(value) => updateDraft({ provider: value })} ariaLabel="Provider" />
