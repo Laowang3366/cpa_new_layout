@@ -169,11 +169,59 @@ export function QuotaCard<TState extends QuotaStatusState>({
     </div>
   );
 
+  const subscriptionState = quota as TState & {
+    planType?: string | null;
+    subscriptionActiveUntil?: string | number | null;
+    rateLimitResetCreditsAvailableCount?: number | null;
+  };
+  const planType = subscriptionState.planType?.trim() ?? '';
+  const normalizedPlanType = planType.toLowerCase().replace(/[_-]/g, '');
+  const planKey =
+    displayType === 'claude' && planType
+      ? `claude_quota.${planType}`
+      : normalizedPlanType === 'plus'
+        ? 'codex_quota.plan_plus'
+        : normalizedPlanType === 'pro'
+          ? 'codex_quota.plan_pro'
+          : normalizedPlanType === 'team'
+            ? 'codex_quota.plan_team'
+            : normalizedPlanType === 'free'
+              ? 'codex_quota.plan_free'
+              : normalizedPlanType === 'prolite'
+                ? 'codex_quota.plan_prolite'
+                : '';
+  const translatedPlan = planKey ? t(planKey) : '';
+  const planLabel = translatedPlan && translatedPlan !== planKey ? translatedPlan : planType;
+  const expiryValue = subscriptionState.subscriptionActiveUntil;
+  const expiryNumber = Number(expiryValue);
+  const expiryDate = expiryValue
+    ? new Date(Number.isFinite(expiryNumber) && expiryNumber < 1e12 ? expiryNumber * 1000 : expiryValue)
+    : null;
+  const expiryLabel = expiryDate && !Number.isNaN(expiryDate.getTime())
+    ? expiryDate.toLocaleString()
+    : '';
+  const resetCredits = subscriptionState.rateLimitResetCreditsAvailableCount;
+  const hasSubscription = quotaStatus === 'success' && Boolean(
+    planLabel || expiryLabel || resetCredits !== null && resetCredits !== undefined
+  );
+  const subscriptionContent = hasSubscription ? (
+    <div className={styles.quotaSubscriptionInfo}>
+      {planLabel && <span><em>{t('codex_quota.plan_label')}</em>{planLabel}</span>}
+      {expiryLabel && <span><em>{t('codex_quota.expires_label')}</em>{expiryLabel}</span>}
+      {resetCredits !== null && resetCredits !== undefined && (
+        <span><em>{t('codex_quota.reset_credits_label')}</em>{resetCredits}</span>
+      )}
+    </div>
+  ) : (
+    <span className={styles.quotaTableEmpty}>--</span>
+  );
+
   if (listMode) {
     return (
       <tr className={item.disabled ? styles.quotaTableRowDisabled : ''}>
         <td className={styles.quotaTableNameCell} title={item.name}>{item.name}</td>
         <td>{typeBadge}</td>
+        <td>{subscriptionContent}</td>
         <td className={styles.quotaTableValueCell}>{quotaContent}</td>
         <td className={styles.quotaTableActionsCell}>{actions}</td>
       </tr>

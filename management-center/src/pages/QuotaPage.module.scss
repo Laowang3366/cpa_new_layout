@@ -743,7 +743,7 @@
 
 .quotaTable {
   width: 100%;
-  min-width: 920px;
+  min-width: 1080px;
   border-collapse: collapse;
   table-layout: fixed;
   color: var(--text-primary);
@@ -775,10 +775,11 @@
     background: color-mix(in srgb, var(--bg-hover) 66%, transparent);
   }
 
-  th:nth-child(1) { width: 28%; }
-  th:nth-child(2) { width: 120px; }
-  th:nth-child(3) { width: auto; }
-  th:nth-child(4) { width: 190px; }
+  th:nth-child(1) { width: 260px; }
+  th:nth-child(2) { width: 110px; }
+  th:nth-child(3) { width: 230px; }
+  th:nth-child(4) { width: auto; }
+  th:nth-child(5) { width: 190px; }
 }
 
 .quotaTableNameCell {
@@ -796,6 +797,14 @@
     padding: 0;
     border-top: 0;
   }
+
+  .codexPlan {
+    display: none;
+  }
+
+  .quotaBar {
+    width: min(100%, 320px);
+  }
 }
 
 .quotaTableActionsCell {
@@ -807,6 +816,31 @@
 
 .quotaTableRowDisabled {
   opacity: 0.68;
+}
+
+.quotaSubscriptionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.35;
+
+  span {
+    display: flex;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  em {
+    flex: 0 0 auto;
+    color: var(--text-tertiary);
+    font-style: normal;
+  }
+}
+
+.quotaTableEmpty {
+  color: var(--text-tertiary);
 }
 
 .cardHeader {

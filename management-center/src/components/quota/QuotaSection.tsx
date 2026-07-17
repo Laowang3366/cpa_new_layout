@@ -410,6 +410,7 @@ export function QuotaSection<TState extends QuotaStatusState, TData>({
                   <tr>
                     <th>{t('auth_files.list_name')}</th>
                     <th>{t('auth_files.list_type')}</th>
+                    <th>{t('auth_files.list_subscription')}</th>
                     <th>{t('auth_files.remaining_quota')}</th>
                     <th>{t('auth_files.list_actions')}</th>
                   </tr>
