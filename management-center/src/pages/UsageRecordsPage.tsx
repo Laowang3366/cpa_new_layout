@@ -147,14 +147,32 @@ function HeaderFilter({
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
 
   useEffect(() => {
     if (!open) return;
     const closeOnOutsideClick = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (!rootRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
     };
     document.addEventListener('mousedown', closeOnOutsideClick);
     return () => document.removeEventListener('mousedown', closeOnOutsideClick);
+  }, [open]);
+
+  useLayoutEffect(() => {
+    if (!open || !rootRef.current) return;
+    const rect = rootRef.current.getBoundingClientRect();
+    const width = 148;
+    const left = Math.min(Math.max(8, rect.left), window.innerWidth - width - 8);
+    setMenuStyle({ top: rect.bottom + 8, left, width });
+    const closeOnViewportChange = () => setOpen(false);
+    window.addEventListener('resize', closeOnViewportChange);
+    window.addEventListener('scroll', closeOnViewportChange, true);
+    return () => {
+      window.removeEventListener('resize', closeOnViewportChange);
+      window.removeEventListener('scroll', closeOnViewportChange, true);
+    };
   }, [open]);
 
   return (
@@ -169,8 +187,8 @@ function HeaderFilter({
         <span>{label}</span>
         <IconChevronDown size={12} />
       </button>
-      {open && (
-        <div className={styles.headerFilterMenu} role="listbox" aria-label={label}>
+      {open && createPortal(
+        <div ref={menuRef} className={styles.headerFilterMenu} style={menuStyle} role="listbox" aria-label={label}>
           {options.map((option) => (
             <button
               key={option.value}
@@ -183,7 +201,8 @@ function HeaderFilter({
               {option.label}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
@@ -583,6 +602,15 @@ export function UsageRecordsPage() {
     ],
     [stats.providers, t]
   );
+  const modelOptions = useMemo(
+    () => [
+      { value: '', label: t('usage_records.all_models', { defaultValue: '全部模型' }) },
+      ...Array.from(new Set(stats.models.map((item) => item.key).filter(Boolean)))
+        .sort((left, right) => left.localeCompare(right))
+        .map((model) => ({ value: model, label: model })),
+    ],
+    [stats.models, t]
+  );
   const statusOptions = [
     { value: 'all', label: t('usage_records.status_all', { defaultValue: '全部状态' }) },
     { value: 'success', label: t('usage_records.status_success', { defaultValue: '成功' }) },
@@ -782,17 +810,19 @@ export function UsageRecordsPage() {
                 <thead>
                   <tr>
                     <SortableHeader label={t('usage_records.time', { defaultValue: '时间' })} field="timestamp" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
-                    <SortableHeader label={t('usage_records.model', { defaultValue: '模型' })} field="model" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
+                    <th>
+                      <HeaderFilter label={t('usage_records.model', { defaultValue: '模型' })} value={draftFilters.model ?? ''} defaultValue="" options={modelOptions} onChange={(value) => updateDraft({ model: value })} />
+                    </th>
                     <th>
                       <HeaderFilter label={t('usage_records.provider', { defaultValue: 'Provider' })} value={draftFilters.provider ?? ''} defaultValue="" options={providerOptions} onChange={(value) => updateDraft({ provider: value })} />
                     </th>
                     <th>{t('usage_records.account', { defaultValue: '账号' })}</th>
                     <th>{t('usage_records.endpoint', { defaultValue: '端点' })}</th>
                     <th>{t('usage_records.reasoning_effort', { defaultValue: '思考等级' })}</th>
-                    <SortableHeader label={t('usage_records.tokens', { defaultValue: 'Token' })} field="tokens" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
+                    <th>{t('usage_records.tokens', { defaultValue: 'Token' })}</th>
                     <th>{t('usage_records.cache_hit_rate', { defaultValue: '缓存命中率' })}</th>
-                    <SortableHeader label={t('usage_records.cost', { defaultValue: '费用' })} field="cost" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
-                    <SortableHeader label={t('usage_records.latency', { defaultValue: '耗时' })} field="latency" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
+                    <th>{t('usage_records.cost', { defaultValue: '费用' })}</th>
+                    <th>{t('usage_records.latency', { defaultValue: '耗时' })}</th>
                     <th>
                       <HeaderFilter label={t('usage_records.status', { defaultValue: '状态' })} value={draftFilters.status ?? 'all'} defaultValue="all" options={statusOptions} onChange={(value) => updateDraft({ status: value as UsageStatusFilter })} />
                     </th>
