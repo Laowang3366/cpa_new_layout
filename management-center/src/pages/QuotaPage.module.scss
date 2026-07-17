@@ -5,8 +5,10 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-lg;
-  width: min(100%, 1120px);
+  width: 100%;
+  max-width: 1320px;
   margin-inline: auto;
+  box-sizing: border-box;
 }
 
 .pageHeader {
