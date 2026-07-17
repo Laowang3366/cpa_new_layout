@@ -818,12 +818,14 @@
 
   .quotaBar {
     grid-column: 2;
-    width: 100%;
+    grid-row: 1;
+    width: 220px;
+    max-width: 100%;
   }
 
   .quotaRow {
     display: grid;
-    grid-template-columns: minmax(54px, auto) minmax(160px, 320px) auto;
+    grid-template-columns: minmax(54px, auto) 220px auto;
     align-items: center;
     justify-content: start;
     column-gap: 10px;
@@ -836,12 +838,16 @@
 
   .quotaModel {
     grid-column: 1;
+    grid-row: 1;
+    align-self: center;
   }
 
   .quotaMeta {
     grid-column: 3;
+    grid-row: 1;
     gap: 0;
     justify-self: start;
+    align-self: center;
   }
 }
 
