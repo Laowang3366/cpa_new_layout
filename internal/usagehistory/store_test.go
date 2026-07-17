@@ -146,3 +146,87 @@ func TestBuiltinPricingAppliesLongContextTierAbove272K(t *testing.T) {
 		t.Fatalf("long context cost = %.9f, want 1.360005", long.Cost)
 	}
 }
+
+func TestBuiltinXAIPricingUsesOfficialTokenRates(t *testing.T) {
+	tests := []struct {
+		name     string
+		provider string
+		model    string
+		tokens   TokenStats
+		want     float64
+	}{
+		{
+			name:     "grok 4.5 standard with cache and reasoning",
+			provider: "xai", model: "grok-4.5",
+			tokens: TokenStats{InputTokens: 100_000, CachedTokens: 50_000, OutputTokens: 100_000, ReasoningTokens: 20_000},
+			want:   0.725,
+		},
+		{
+			name:     "grok 4.3 standard",
+			provider: "x-ai", model: "grok-4.3",
+			tokens: TokenStats{InputTokens: 100_000, OutputTokens: 100_000},
+			want:   0.375,
+		},
+		{
+			name:     "grok build standard",
+			provider: "grok", model: "grok-build-0.1",
+			tokens: TokenStats{InputTokens: 100_000, OutputTokens: 100_000},
+			want:   0.3,
+		},
+		{
+			name:     "grok 3 mini fast alias",
+			provider: "x.ai", model: "grok-3-mini-fast",
+			tokens: TokenStats{InputTokens: 1_000_000, CachedTokens: 200_000, OutputTokens: 1_000_000},
+			want:   0.755,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			priced := withCost(Record{Provider: tt.provider, Model: tt.model, Tokens: tt.tokens}, defaultPricingConfig())
+			if !priced.CostKnown || math.Abs(priced.Cost-tt.want) > 1e-9 {
+				t.Fatalf("cost = %.9f known=%v, want %.9f known", priced.Cost, priced.CostKnown, tt.want)
+			}
+		})
+	}
+}
+
+func TestBuiltinXAIPricingAppliesLongContextRatesAtThreshold(t *testing.T) {
+	priced := withCost(Record{
+		Provider: "xai",
+		Model:    "grok-4.5",
+		Tokens: TokenStats{
+			InputTokens:  200_000,
+			CachedTokens: 100_000,
+			OutputTokens: 100_000,
+		},
+	}, defaultPricingConfig())
+	if !priced.CostKnown || math.Abs(priced.Cost-1.7) > 1e-9 {
+		t.Fatalf("cost = %.9f known=%v, want 1.7 known", priced.Cost, priced.CostKnown)
+	}
+}
+
+func TestConfiguredXAIPricingOverridesBuiltin(t *testing.T) {
+	pricing := defaultPricingConfig()
+	pricing.Models["xai/grok-4.5"] = PricingRule{
+		Enabled: true, InputPerMillion: 10, OutputPerMillion: 20, CachedPerMillion: 5,
+	}
+	priced := withCost(Record{
+		Provider: "xai", Model: "grok-4.5",
+		Tokens: TokenStats{InputTokens: 1_000_000, OutputTokens: 1_000_000},
+	}, pricing)
+	if !priced.CostKnown || math.Abs(priced.Cost-30) > 1e-9 {
+		t.Fatalf("cost = %.9f known=%v, want configured cost 30", priced.Cost, priced.CostKnown)
+	}
+}
+
+func TestBuiltinXAIPricingLeavesMediaAndUnknownModelsUnpriced(t *testing.T) {
+	for _, model := range []string{"grok-imagine-image", "grok-imagine-video", "grok-composer-2.5-fast"} {
+		priced := withCost(Record{
+			Provider: "xai", Model: model,
+			Tokens: TokenStats{InputTokens: 1_000, OutputTokens: 1_000},
+		}, defaultPricingConfig())
+		if priced.CostKnown {
+			t.Fatalf("model %s unexpectedly has token pricing: %.9f", model, priced.Cost)
+		}
+	}
+}

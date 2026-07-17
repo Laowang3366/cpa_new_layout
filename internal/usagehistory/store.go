@@ -714,6 +714,9 @@ func resolvePricingRule(pricing PricingConfig, provider, model string, inputToke
 	if pricing.Default.Enabled {
 		return pricing.Default, true
 	}
+	if rule, ok := builtinXAIPricingRule(provider, model, inputTokens); ok {
+		return rule, true
+	}
 	if rule, ok := builtinPricingRule(model); ok {
 		if inputTokens > longContextInputTokenCutover && builtinLongContextPricing(model) {
 			rule.InputPerMillion *= 2
@@ -722,6 +725,106 @@ func resolvePricingRule(pricing PricingConfig, provider, model string, inputToke
 		return rule, true
 	}
 	return PricingRule{}, false
+}
+
+type xaiPricingRate struct {
+	InputPerMillion      float64
+	OutputPerMillion     float64
+	CachedPerMillion     float64
+	LongInputPerMillion  float64
+	LongOutputPerMillion float64
+	LongCachedPerMillion float64
+	LongContextThreshold int64
+}
+
+// Rates are sourced from the xAI model catalog. xAI publishes token prices in
+// USD cents per 100 million tokens; the values below are converted to USD per
+// 1 million tokens. Media models are intentionally omitted because they use
+// per-image or per-second billing rather than token billing.
+var builtinXAIPricingRates = map[string]xaiPricingRate{
+	"grok-4.5": {
+		InputPerMillion: 2, OutputPerMillion: 6, CachedPerMillion: 0.5,
+		LongInputPerMillion: 4, LongOutputPerMillion: 12, LongCachedPerMillion: 1,
+		LongContextThreshold: 200_000,
+	},
+	"grok-4.3": {
+		InputPerMillion: 1.25, OutputPerMillion: 2.5, CachedPerMillion: 0.2,
+		LongInputPerMillion: 2.5, LongOutputPerMillion: 5, LongCachedPerMillion: 0.4,
+		LongContextThreshold: 200_000,
+	},
+	"grok-4.20-0309-reasoning": {
+		InputPerMillion: 1.25, OutputPerMillion: 2.5, CachedPerMillion: 0.2,
+		LongInputPerMillion: 2.5, LongOutputPerMillion: 5, LongCachedPerMillion: 0.4,
+		LongContextThreshold: 200_000,
+	},
+	"grok-4.20-0309-non-reasoning": {
+		InputPerMillion: 1.25, OutputPerMillion: 2.5, CachedPerMillion: 0.2,
+		LongInputPerMillion: 2.5, LongOutputPerMillion: 5, LongCachedPerMillion: 0.4,
+		LongContextThreshold: 200_000,
+	},
+	"grok-4.20-multi-agent-0309": {
+		InputPerMillion: 1.25, OutputPerMillion: 2.5, CachedPerMillion: 0.2,
+		LongInputPerMillion: 2.5, LongOutputPerMillion: 5, LongCachedPerMillion: 0.4,
+		LongContextThreshold: 200_000,
+	},
+	"grok-build-0.1": {
+		InputPerMillion: 1, OutputPerMillion: 2, CachedPerMillion: 0.2,
+		LongInputPerMillion: 2, LongOutputPerMillion: 4, LongCachedPerMillion: 0.4,
+		LongContextThreshold: 200_000,
+	},
+	"grok-3-mini": {
+		InputPerMillion: 0.3, OutputPerMillion: 0.5, CachedPerMillion: 0.075,
+	},
+}
+
+var builtinXAIPricingAliases = map[string]string{
+	"grok-4.5-latest":                "grok-4.5",
+	"grok-build-latest":              "grok-4.5",
+	"grok-4.3-latest":                "grok-4.3",
+	"grok-latest":                    "grok-4.3",
+	"grok-4.20":                      "grok-4.20-0309-reasoning",
+	"grok-4.20-0309":                 "grok-4.20-0309-reasoning",
+	"grok-4.20-reasoning":            "grok-4.20-0309-reasoning",
+	"grok-4.20-reasoning-latest":     "grok-4.20-0309-reasoning",
+	"grok-4.20-non-reasoning":        "grok-4.20-0309-non-reasoning",
+	"grok-4.20-non-reasoning-latest": "grok-4.20-0309-non-reasoning",
+	"grok-4.20-multi-agent":          "grok-4.20-multi-agent-0309",
+	"grok-4.20-multi-agent-latest":   "grok-4.20-multi-agent-0309",
+	"grok-code-fast-1":               "grok-build-0.1",
+	"grok-code-fast":                 "grok-build-0.1",
+	"grok-3-mini-fast":               "grok-3-mini",
+	"grok-3-mini-latest":             "grok-3-mini",
+	"grok-3-mini-fast-latest":        "grok-3-mini",
+}
+
+func builtinXAIPricingRule(provider, model string, inputTokens int64) (PricingRule, bool) {
+	provider = strings.ToLower(strings.TrimSpace(provider))
+	model = strings.ToLower(strings.TrimSpace(model))
+	if provider != "" && provider != "xai" && provider != "x-ai" && provider != "x.ai" && provider != "grok" {
+		return PricingRule{}, false
+	}
+	if canonical, ok := builtinXAIPricingAliases[model]; ok {
+		model = canonical
+	}
+	rate, ok := builtinXAIPricingRates[model]
+	if !ok {
+		return PricingRule{}, false
+	}
+	inputRate := rate.InputPerMillion
+	outputRate := rate.OutputPerMillion
+	cachedRate := rate.CachedPerMillion
+	if rate.LongContextThreshold > 0 && inputTokens >= rate.LongContextThreshold {
+		inputRate = rate.LongInputPerMillion
+		outputRate = rate.LongOutputPerMillion
+		cachedRate = rate.LongCachedPerMillion
+	}
+	return PricingRule{
+		Enabled:             true,
+		InputPerMillion:     inputRate,
+		OutputPerMillion:    outputRate,
+		ReasoningPerMillion: outputRate,
+		CachedPerMillion:    cachedRate,
+	}, true
 }
 
 var builtinPricingRates = map[string][3]float64{
