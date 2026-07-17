@@ -394,6 +394,39 @@
   white-space: nowrap;
 }
 
+.sortableHeader {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sortableHeader:hover,
+.sortableHeaderActive {
+  color: var(--primary-color);
+}
+
+.sortDirection {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+  color: var(--text-tertiary);
+}
+
+.sortDirection svg {
+  margin-block: -2px;
+  stroke-width: 2.5;
+}
+
+.sortDirectionActive {
+  color: var(--primary-color);
+}
+
 .table td {
   max-width: 220px;
   padding: 12px;

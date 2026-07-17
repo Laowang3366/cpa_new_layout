@@ -11,6 +11,7 @@ import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import {
   IconChevronLeft,
   IconChevronDown,
+  IconChevronUp,
   IconDollarSign,
   IconPlus,
   IconRefreshCw,
@@ -35,6 +36,7 @@ import { getErrorMessage } from '@/utils/helpers';
 import styles from './UsageRecordsPage.module.scss';
 
 const PAGE_SIZES = [10, 30, 50] as const;
+type UsageSortField = Exclude<UsageRecordFilters['sort_by'], undefined>;
 
 const toDateInputValue = (date: Date) => {
   const year = date.getFullYear();
@@ -271,6 +273,33 @@ function LatencyDetails({ firstTokenMs, totalMs }: { firstTokenMs?: number; tota
         <strong>{formatLatency(totalMs)}</strong>
       </span>
     </div>
+  );
+}
+
+function SortableHeader({
+  label,
+  field,
+  activeField,
+  direction,
+  onSort,
+}: {
+  label: string;
+  field: UsageSortField;
+  activeField: UsageSortField;
+  direction: 'asc' | 'desc';
+  onSort: (field: UsageSortField) => void;
+}) {
+  const active = field === activeField;
+  return (
+    <th aria-sort={active ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'}>
+      <button type="button" className={`${styles.sortableHeader} ${active ? styles.sortableHeaderActive : ''}`} onClick={() => onSort(field)}>
+        <span>{label}</span>
+        <span className={styles.sortDirection} aria-hidden="true">
+          <IconChevronUp className={active && direction === 'asc' ? styles.sortDirectionActive : ''} size={11} />
+          <IconChevronDown className={active && direction === 'desc' ? styles.sortDirectionActive : ''} size={11} />
+        </span>
+      </button>
+    </th>
   );
 }
 
@@ -517,19 +546,6 @@ export function UsageRecordsPage() {
     { value: 'success', label: t('usage_records.status_success', { defaultValue: '成功' }) },
     { value: 'failed', label: t('usage_records.status_failed', { defaultValue: '失败' }) },
   ];
-  const sortOptions = [
-    { value: 'timestamp', label: t('usage_records.sort_time', { defaultValue: '时间' }) },
-    { value: 'model', label: t('usage_records.sort_model', { defaultValue: '模型' }) },
-    { value: 'provider', label: t('usage_records.sort_provider', { defaultValue: 'Provider' }) },
-    { value: 'tokens', label: t('usage_records.sort_tokens', { defaultValue: 'Token' }) },
-    { value: 'cost', label: t('usage_records.sort_cost', { defaultValue: '费用' }) },
-    { value: 'latency', label: t('usage_records.sort_latency', { defaultValue: '耗时' }) },
-  ];
-  const sortOrderOptions = [
-    { value: 'desc', label: t('usage_records.sort_desc', { defaultValue: '降序' }) },
-    { value: 'asc', label: t('usage_records.sort_asc', { defaultValue: '升序' }) },
-  ];
-
   const updateDraft = (patch: Partial<UsageRecordFilters>) => {
     setDraftFilters((current) => ({ ...current, ...patch }));
   };
@@ -549,10 +565,21 @@ export function UsageRecordsPage() {
       model: '',
       endpoint: '',
       status: 'all' as UsageStatusFilter,
+      sort_by: 'timestamp' as const,
+      sort_order: 'desc' as const,
     };
     setDraftFilters(next);
     setFilters(next);
     setPage(1);
+  };
+
+  const handleSort = (field: UsageSortField) => {
+    const activeField = draftFilters.sort_by ?? 'timestamp';
+    const direction = draftFilters.sort_order ?? 'desc';
+    updateDraft({
+      sort_by: field,
+      sort_order: activeField === field && direction === 'desc' ? 'asc' : 'desc',
+    });
   };
 
   const openPricing = () => {
@@ -711,14 +738,6 @@ export function UsageRecordsPage() {
             <label>{t('usage_records.status', { defaultValue: '状态' })}</label>
             <Select value={draftFilters.status ?? 'all'} options={statusOptions} onChange={(value) => updateDraft({ status: value as UsageStatusFilter })} ariaLabel="Status" />
           </div>
-          <div className={styles.filterField}>
-            <label>{t('usage_records.sort_by', { defaultValue: '排序字段' })}</label>
-            <Select value={draftFilters.sort_by ?? 'timestamp'} options={sortOptions} onChange={(value) => updateDraft({ sort_by: value as UsageRecordFilters['sort_by'] })} ariaLabel="Sort by" />
-          </div>
-          <div className={styles.filterField}>
-            <label>{t('usage_records.sort_order', { defaultValue: '排序方向' })}</label>
-            <Select value={draftFilters.sort_order ?? 'desc'} options={sortOrderOptions} onChange={(value) => updateDraft({ sort_order: value as UsageRecordFilters['sort_order'] })} ariaLabel="Sort order" />
-          </div>
           <div className={styles.filterActions}>
             <Button variant="secondary" size="sm" onClick={resetFilters}>{t('common.reset', { defaultValue: '重置' })}</Button>
           </div>
@@ -744,16 +763,16 @@ export function UsageRecordsPage() {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>{t('usage_records.time', { defaultValue: '时间' })}</th>
-                    <th>{t('usage_records.model', { defaultValue: '模型' })}</th>
-                    <th>{t('usage_records.provider', { defaultValue: 'Provider' })}</th>
+                    <SortableHeader label={t('usage_records.time', { defaultValue: '时间' })} field="timestamp" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
+                    <SortableHeader label={t('usage_records.model', { defaultValue: '模型' })} field="model" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
+                    <SortableHeader label={t('usage_records.provider', { defaultValue: 'Provider' })} field="provider" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
                     <th>{t('usage_records.account', { defaultValue: '账号' })}</th>
                     <th>{t('usage_records.endpoint', { defaultValue: '端点' })}</th>
                     <th>{t('usage_records.reasoning_effort', { defaultValue: '思考等级' })}</th>
-                    <th>{t('usage_records.tokens', { defaultValue: 'Token' })}</th>
+                    <SortableHeader label={t('usage_records.tokens', { defaultValue: 'Token' })} field="tokens" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
                     <th>{t('usage_records.cache_hit_rate', { defaultValue: '缓存命中率' })}</th>
-                    <th>{t('usage_records.cost', { defaultValue: '费用' })}</th>
-                    <th>{t('usage_records.latency', { defaultValue: '耗时' })}</th>
+                    <SortableHeader label={t('usage_records.cost', { defaultValue: '费用' })} field="cost" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
+                    <SortableHeader label={t('usage_records.latency', { defaultValue: '耗时' })} field="latency" activeField={draftFilters.sort_by ?? 'timestamp'} direction={draftFilters.sort_order ?? 'desc'} onSort={handleSort} />
                     <th>{t('usage_records.status', { defaultValue: '状态' })}</th>
                   </tr>
                 </thead>
